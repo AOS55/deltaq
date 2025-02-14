@@ -1025,7 +1025,7 @@ graph LR
       <description>&lt;h3 id=&#34;why-is-this-blog-called-q-&#34;&gt;Why is this blog called ∇Q ?&lt;/h3&gt;
 &lt;p&gt;A couple of reasons:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;My started out in aerospace and &lt;a href=&#34;https://en.wikipedia.org/wiki/Max_q&#34;&gt;max-Q&lt;/a&gt; (∇Q=0) is the point where a spacecraft experiences the most force on departure and is a key design point.&lt;/li&gt;
+&lt;li&gt;I started out in aerospace and &lt;a href=&#34;https://en.wikipedia.org/wiki/Max_q&#34;&gt;max-Q&lt;/a&gt; (∇Q=0) is the point where a spacecraft experiences the most force on departure and is key design parameter.&lt;/li&gt;
 &lt;li&gt;My surname is &lt;strong&gt;Q&lt;/strong&gt;&lt;em&gt;uessy&lt;/em&gt;.&lt;/li&gt;
 &lt;li&gt;This blog is about answering &lt;strong&gt;Q&lt;/strong&gt;&lt;em&gt;uestions&lt;/em&gt;.&lt;/li&gt;
 &lt;/ul&gt;
@@ -1035,7 +1035,7 @@ graph LR
       <content:encoded><![CDATA[<h3 id="why-is-this-blog-called-q-">Why is this blog called ∇Q ?</h3>
 <p>A couple of reasons:</p>
 <ul>
-<li>My started out in aerospace and <a href="https://en.wikipedia.org/wiki/Max_q">max-Q</a> (∇Q=0) is the point where a spacecraft experiences the most force on departure and is a key design point.</li>
+<li>I started out in aerospace and <a href="https://en.wikipedia.org/wiki/Max_q">max-Q</a> (∇Q=0) is the point where a spacecraft experiences the most force on departure and is key design parameter.</li>
 <li>My surname is <strong>Q</strong><em>uessy</em>.</li>
 <li>This blog is about answering <strong>Q</strong><em>uestions</em>.</li>
 </ul>

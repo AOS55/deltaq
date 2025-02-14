@@ -5,7 +5,7 @@ title: 'FAQ'
 ### Why is this blog called ∇Q ?
 
 A couple of reasons:
-- My started out in aerospace and [max-Q](https://en.wikipedia.org/wiki/Max_q) (∇Q=0) is the point where a spacecraft experiences the most force on departure and is a key design point.
+- I started out in aerospace and [max-Q](https://en.wikipedia.org/wiki/Max_q) (∇Q=0) is the point where a spacecraft experiences the most force on departure and is key design parameter.
 - My surname is **Q***uessy*.
 - This blog is about answering **Q***uestions*. 
 
