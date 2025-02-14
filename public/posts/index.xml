@@ -981,10 +981,10 @@ graph LR
 <h2 id="prerequisites">Prerequisites</h2>
 <p>To understand the approaches we&rsquo;ll discuss, you should have:</p>
 <ul>
-<li>Basic familiarity with machine learning concepts (neural networks, gradient descent).</li>
-<li>Some understanding of probability and linear algebra.</li>
-<li>Basic programming knowledge.</li>
-<li>No robotics or control theory background needed - we&rsquo;ll build these concepts from the ground up.</li>
+<li>Good understanding of <a href="https://greenteapress.com/wp/think-stats-3e/">probability</a> and <a href="https://minireference.com/static/tutorials/linear_algebra_in_4_pages.pdf">linear algebra</a>.</li>
+<li>Basic familiarity with <a href="https://www.microsoft.com/en-us/research/uploads/prod/2006/01/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf">machine learning</a> and <a href="https://www.deeplearningbook.org">deep learning</a>.</li>
+<li><a href="https://allendowney.github.io/ThinkPython/chap00.html">Basic</a> <a href="https://docs.fast.ai">programming</a> and <a href="https://mimoza.marmara.edu.tr/~msakalli/cse706_12/SkienaTheAlgorithmDesignManual.pdf">computer</a> <a href="https://mitp-content-server.mit.edu/books/content/sectbyfn/books_pres_0/6515/sicp.zip/index.html">science</a> knowledge.</li>
+<li>Basic understanding of <a href="https://marsuniversity.github.io/ece387/Introduction-to-Robotics-Craig.pdf">robotics</a>/<a href="https://oxvard.wordpress.com/wp-content/uploads/2018/05/engineering-mechanics-dynamics-7th-edition-j-l-meriam-l-g-kraige.pdf">mechaniscs</a> and <a href="https://ctms.engin.umich.edu/CTMS/index.php?aux=Home">control</a>.</li>
 </ul>
 <h2 id="what-these-posts-cover">What These Posts Cover</h2>
 <p>We&rsquo;ll explore how robot learning is tackling Moravec&rsquo;s paradox:</p>

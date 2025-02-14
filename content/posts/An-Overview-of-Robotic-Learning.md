@@ -30,10 +30,10 @@ Robot learning offers a fundamentally different approach. Instead of trying to a
 ## Prerequisites
 To understand the approaches we'll discuss, you should have:
 
-- Basic familiarity with machine learning concepts (neural networks, gradient descent).
-- Some understanding of probability and linear algebra.
-- Basic programming knowledge. 
-- No robotics or control theory background needed - we'll build these concepts from the ground up.
+- Good understanding of [probability](https://greenteapress.com/wp/think-stats-3e/) and [linear algebra](https://minireference.com/static/tutorials/linear_algebra_in_4_pages.pdf).
+- Basic familiarity with [machine learning](https://www.microsoft.com/en-us/research/uploads/prod/2006/01/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf) and [deep learning](https://www.deeplearningbook.org).
+- [Basic](https://allendowney.github.io/ThinkPython/chap00.html) [programming](https://docs.fast.ai) and [computer](https://mimoza.marmara.edu.tr/~msakalli/cse706_12/SkienaTheAlgorithmDesignManual.pdf) [science](https://mitp-content-server.mit.edu/books/content/sectbyfn/books_pres_0/6515/sicp.zip/index.html) knowledge. 
+- Basic understanding of [robotics](https://marsuniversity.github.io/ece387/Introduction-to-Robotics-Craig.pdf)/[mechaniscs](https://oxvard.wordpress.com/wp-content/uploads/2018/05/engineering-mechanics-dynamics-7th-edition-j-l-meriam-l-g-kraige.pdf) and [control](https://ctms.engin.umich.edu/CTMS/index.php?aux=Home).
 
 ## What These Posts Cover
 We'll explore how robot learning is tackling Moravec's paradox:
