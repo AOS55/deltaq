@@ -39,6 +39,9 @@ outputs:
     - JSON
 
 params:
+  title: "∇Q - Machine Learning and Robotics Blog"
+  keywords: ["machine learning", "robotics", "AI", "technical blog", "programming"]
+  description: "Exploring Machine Learning, Robotics, and AI through projects, experiments, and technical notes by Alexander Quessy."
   homeInfoParams:
     Title: "Welcome to ∇Q"  # Added wave emoji like the example
     Content: >
@@ -57,9 +60,12 @@ params:
   ShowCodeCopyButtons: true
   ShowRssButtonInSectionTermList: true
   ShowAuthor: true        # To show author name in posts like in the example
+  enableRobotsTXT: true
+  googleSiteVerify: true
   
   assets:
     favicon: "/favicon.ico"
+    apple_touch_icon: "/apple-touch-icon.png"
     katex: true
     mermaid: true
 
@@ -69,10 +75,17 @@ params:
 
   enableSearch: true
 
-  copyright: "© 2024 Alexander Quessy"
+  copyright: "© 2025 Alexander Quessy"
   images: ["apple-touch-icon.png"]
   author:
     name: "Alexander Quessy"
-    email: "alexander@quessy.io" 
+    email: "alexander@quessy.io"
+    about: "Machine Learning and Robotics Researcher" 
   showFullTextinRSS: true
+
+  analytics:
+    umami:
+      enable: true
+      websiteId: ""
+      jsLocation: ""
 
