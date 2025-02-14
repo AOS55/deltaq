@@ -410,6 +410,21 @@ State estimation acts as a bridge between perception and control in robotics, en
 
 {{< figure src="/blogs/Key-Learning-Paradigms-in-Robotics/GTSAM.png" caption="Figure 16: GTSAM [Structure from Motion](https://gtsam.org/tutorials/intro.html)" height="300px" align="center" >}}
 
+## Citation
+
+> Quessy, Alexander. (2025). Robotic Learning for Curious People. *aos55.github.io/deltaq*. [https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/](https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/).
+
+```bibtex
+@article{quessy2025roboticlearning,
+  title   = "Robotic Learning for Curious People",
+  author  = "Quessy, Alexander",
+  journal = "aos55.github.io/deltaq",
+  year    = "2025",
+  month   = "Feb",
+  url     = "https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/"
+}
+```
+
 ## References
 
 [^1]: P. F. Hokayem and M. W. Spong, _Bilateral Teleoperation: An Historical Survey_. Cambridge, UK: Cambridge University Press, 2006.

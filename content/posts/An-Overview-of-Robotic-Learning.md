@@ -44,6 +44,10 @@ We'll explore how robot learning is tackling Moravec's paradox:
 4. Modern Approaches: How new techniques are making headway on these problems.
 5. Real World Applications: How these techniques are being applied in the real-world.
 
+## Citation
+
+> Quessy, Alexander. (2025). Robotic Learning for Curious People. *aos55.github.io/deltaq*. [https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/](https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/).
+
 ```bibtex
 @article{quessy2025roboticlearning,
   title   = "Robotic Learning for Curious People",

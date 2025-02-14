@@ -139,6 +139,21 @@ The MDP framework is especially useful for Robotic learning for three key reason
 	- Model-Predictive Control[^3] (MPC) uses explicit models of state transitions to plan sequences of actions.
 	- Imitation Learning (IL)[^4] can learn from human demonstrations by modelling them as optimal MDP solutions.
 
+## Citation
+
+> Quessy, Alexander. (2025). Robotic Learning for Curious People. *aos55.github.io/deltaq*. [https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/](https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/).
+
+```bibtex
+@article{quessy2025roboticlearning,
+  title   = "Robotic Learning for Curious People",
+  author  = "Quessy, Alexander",
+  journal = "aos55.github.io/deltaq",
+  year    = "2025",
+  month   = "Feb",
+  url     = "https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/"
+}
+```
+
 ## References
 
 [^1]: R. Bellman, *Dynamic Programming*. Princeton, NJ: Princeton University Press, 1957 
