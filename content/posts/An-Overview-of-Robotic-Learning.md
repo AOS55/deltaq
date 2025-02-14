@@ -51,7 +51,7 @@ We'll explore how robot learning is tackling Moravec's paradox:
   journal = "aos55.github.io/deltaq",
   year    = "2025",
   month   = "Feb",
-  url     = "https://aos55.github.io/deltaq/posts/key-learning-paradigms-in-robotics/"
+  url     = "https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/"
 }
 ```
 
