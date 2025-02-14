@@ -1,0 +1,15 @@
+{{ $file := .Get "file" }}
+{{ $video := resources.Get $file }}
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="{{ $video.Permalink }}" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    {{ with .Get "caption" }}
+    <figcaption>
+        <p>{{ . | markdownify }}</p>
+    </figcaption>
+    {{ end }}
+</figure>

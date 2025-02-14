@@ -1,31 +1,26 @@
-<figure{{ if or (.Get "class") (eq (.Get "align") "center") }} class="
-           {{- if eq (.Get "align") "center" }}align-center {{ end }}
-           {{- with .Get "class" }}{{ . }}{{- end }}"
-{{- end -}}>
-    {{- if .Get "link" -}}
-        <a href="{{ .Get "link" }}"{{ with .Get "target" }} target="{{ . }}"{{ end }}{{ with .Get "rel" }} rel="{{ . }}"{{ end }}>
-    {{- end }}
-    <img loading="lazy" src="{{ .Get "src" }}{{- if eq (.Get "align") "center" }}#center{{- end }}"
-         {{- if or (.Get "alt") (.Get "caption") }}
-         alt="{{ with .Get "alt" }}{{ . }}{{ else }}{{ .Get "caption" | markdownify| plainify }}{{ end }}"
-         {{- end -}}
-         {{- with .Get "width" }} width="{{ . }}"{{ end -}}
-         {{- with .Get "height" }} height="{{ . }}"{{ end -}}
-    /> <!-- Closing img tag -->
-    {{- if .Get "link" }}</a>{{ end -}}
-    {{- if or (or (.Get "title") (.Get "caption")) (.Get "attr") -}}
-        <figcaption>
-            {{ with (.Get "title") -}}
-                {{ . }}
-            {{- end -}}
-            {{- if or (.Get "caption") (.Get "attr") -}}<p>
-                {{- .Get "caption" | markdownify -}}
-                {{- with .Get "attrlink" }}
-                    <a href="{{ . }}">
-                {{- end -}}
-                {{- .Get "attr" | markdownify -}}
-                {{- if .Get "attrlink" }}</a>{{ end }}</p>
-            {{- end }}
-        </figcaption>
-    {{- end }}
-</figure>
+{{ $src := .Get "src" }}
+{{ $resource := resources.Get (strings.TrimPrefix "/" $src) }}
+
+{{ if $resource }}
+    <figure class="text-center {{ .Get "class" }}" style="text-align: center;">
+        <img loading="lazy" 
+             src="{{ $resource.RelPermalink }}"
+             style="display: block; margin: 0 auto; {{ with .Get "height" }}height: {{ . }};{{ end }}"
+             {{- if or (.Get "alt") (.Get "caption") }}
+             alt="{{ with .Get "alt" }}{{ . }}{{ else }}{{ .Get "caption" | markdownify | plainify }}{{ end }}"
+             {{- end -}}
+             {{- with .Get "width" }} width="{{ . }}"{{ end }}
+        />
+        {{ if or (or (.Get "title") (.Get "caption")) (.Get "attr") }}
+            <figcaption style="text-align: center; margin-top: 10px;">
+                {{ with (.Get "title") }}<strong>{{ . }}</strong><br>{{ end }}
+                <p style="text-align: center;">{{ .Get "caption" | markdownify }}
+                {{ with .Get "attrlink" }}<a href="{{ . }}">{{ end }}
+                {{ .Get "attr" | markdownify }}
+                {{ if .Get "attrlink" }}</a>{{ end }}</p>
+            </figcaption>
+        {{ end }}
+    </figure>
+{{ else }}
+    <p>Error: Image "{{ $src }}" not found in assets directory.</p>
+{{ end }}

@@ -77,17 +77,12 @@
   </script>
 
 
-
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      mermaid.initialize({
-        startOnLoad: true,
-        securityLevel: 'loose',});
-    });
-  </script>
-
-
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    mermaid.initialize({ startOnLoad: true });
+  });
+</script>
 </head>
 
 <body class="" id="top">
@@ -198,8 +193,10 @@ where $s_{t}$ represents the state at time $t$ (like the position of the gripper
 
 
 
+
     <figure class="text-center " style="text-align: center;">
-        <img loading="lazy" src="http://localhost:1313/deltaq/Gripper500.gif"
+        <img loading="lazy" 
+             src="/deltaq/Gripper500.gif"
              style="display: block; margin: 0 auto; "
              alt="☕️ Gripper"
         />
