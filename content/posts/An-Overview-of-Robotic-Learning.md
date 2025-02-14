@@ -44,6 +44,17 @@ We'll explore how robot learning is tackling Moravec's paradox:
 4. Modern Approaches: How new techniques are making headway on these problems.
 5. Real World Applications: How these techniques are being applied in the real-world.
 
+```bibtex
+@article{quessy2025roboticlearning,
+  title   = "Robotic Learning for Curious People",
+  author  = "Quessy, Alexander",
+  journal = "aos55.github.io/deltaq",
+  year    = "2025",
+  month   = "Feb",
+  url     = "https://aos55.github.io/deltaq/posts/key-learning-paradigms-in-robotics/"
+}
+```
+
 ## References
 
 [^1]: Minsky, M. (1988). *The Society of Mind*. New York: Simon and Schuster.
