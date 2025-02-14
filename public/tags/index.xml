@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Tags on ∇Q</title>
+    <link>http://localhost:1313/deltaq/tags/</link>
+    <description>Recent content in Tags on ∇Q</description>
+    <image>
+      <title>∇Q</title>
+      <url>http://localhost:1313/deltaq/apple-touch-icon.png</url>
+      <link>http://localhost:1313/deltaq/apple-touch-icon.png</link>
+    </image>
+    <generator>Hugo -- 0.143.1</generator>
+    <language>en-us</language>
+    <managingEditor>alexander@quessy.io (Alexander Quessy)</managingEditor>
+    <webMaster>alexander@quessy.io (Alexander Quessy)</webMaster>
+    <atom:link href="http://localhost:1313/deltaq/tags/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>

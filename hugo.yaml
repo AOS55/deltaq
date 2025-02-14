@@ -1,0 +1,78 @@
+baseURL: https://aos55.github.io/deltaq
+languageCode: en-us
+title: ∇Q
+theme: ["PaperMod"]
+
+menu:
+  main:
+    - name: "Posts"
+      url: "/posts"
+      weight: 1
+    - name: "Search"
+      url: "/search"
+      weight: 2
+    - name: "FAQ"
+      url: /FAQ
+      weight: 3
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+    extensions:
+      passthrough:
+        delimiters:
+          block:
+          - - \[
+            - \]
+          - - $$
+            - $$
+          inline:
+          - - \(
+            - \)
+        enable: true
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+params:
+  homeInfoParams:
+    Title: "Welcome to ∇Q"  # Added wave emoji like the example
+    Content: >
+      Hi, this is Quessy. This blog is a space where I share my notes, projects, and experiments in Machine Learning and Robotics. I hope you find it useful!
+  socialIcons:        # Add social icons like in the example
+    - name: "github"
+      url: "https://github.com/AOS55"
+    - name: "twitter"
+      url: "https://twitter.com/QuessyAlexander"
+    - name: "rss"
+      url: "index.xml"
+  # Display settings
+  ShowReadingTime: true    # Shows estimated reading time
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowRssButtonInSectionTermList: true
+  ShowAuthor: true        # To show author name in posts like in the example
+  
+  assets:
+    favicon: "/favicon.ico"
+    katex: true
+    mermaid: true
+
+  ShowToc: true       # Enables the Table of Contents globally
+  math: true
+  diagram: true
+
+  enableSearch: true
+
+  copyright: "© 2024 Alexander Quessy"
+  images: ["apple-touch-icon.png"]
+  author:
+    name: "Alexander Quessy"
+    email: "alexander@quessy.io" 
+  showFullTextinRSS: true
+

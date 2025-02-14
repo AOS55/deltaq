@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head>
+	<meta name="generator" content="Hugo 0.143.1"><script src="/deltaq/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=deltaq/livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>∇Q</title>
+
+<meta name="description" content="">
+<meta name="author" content="map[email:alexander@quessy.io name:Alexander Quessy]">
+<link rel="canonical" href="http://localhost:1313/deltaq/">
+<link crossorigin="anonymous" href="/deltaq/assets/css/stylesheet.20aa85504f298988d64d4e56b6da40c8235d7e141a3b71dfe711f58ca5c303d0.css" integrity="sha256-IKqFUE8piYjWTU5WttpAyCNdfhQaO3Hf5xH1jKXDA9A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/deltaq/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/deltaq/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/deltaq/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/deltaq/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/deltaq/index.xml">
+<link rel="alternate" type="application/json" href="http://localhost:1313/deltaq/index.json">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/deltaq/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css" 
+        integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ" 
+        crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js" 
+          integrity="sha384-VQ8d8WVFw0yHhCk5E8I86oOhv48xLpnDZx5T9GogA/Y84DcCKWXDmSDfn13bzFZY" 
+          crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js" 
+          integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR" 
+          crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "$", right: "$", display: false}
+        ]
+      });
+    });
+  </script>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        securityLevel: 'loose',});
+    });
+  </script>
+
+
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/deltaq/" accesskey="h" title="∇Q (Alt + H)">∇Q</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/deltaq/posts" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/deltaq/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/deltaq/faq" title="FAQ">
+                    <span>FAQ</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<article class="first-entry home-info">
+    <header class="entry-header">
+        <h1>Welcome to ∇Q</h1>
+    </header>
+    <div class="entry-content">
+        Hi, this is Quessy. This blog is a space where I share my notes, projects, and experiments in Machine Learning and Robotics. I hope you find it useful!
+    </div>
+    <footer class="entry-footer">
+        <div class="social-icons" >
+    <a href="https://github.com/AOS55" target="_blank" rel="noopener noreferrer me"
+        title="Github">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+    </a>
+    <a href="https://twitter.com/QuessyAlexander" target="_blank" rel="noopener noreferrer me"
+        title="Twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z">
+    </path>
+</svg>
+    </a>
+    <a href="index.xml" target="_blank" rel="noopener noreferrer me"
+        title="Rss">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 11a9 9 0 0 1 9 9" />
+    <path d="M4 4a16 16 0 0 1 16 16" />
+    <circle cx="5" cy="19" r="1" />
+</svg>
+    </a>
+</div>
+
+    </footer>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Robotic Learning Part 2: Key Learning Paradigms in Robotics
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>In this post, we’ll explore the fundamental methods used to teach robots new skills. The three main paradigms we’ll explore are:
+Imitation Learning: Teaching robots by showing them what to do Reinforcement Learning: Letting robots discover solutions through experience Supervised Learning: Using labeled data to build core perception and planning capabilities Each of these approaches tackles the fundamental challenges of robotic learning in different ways, and modern systems often combine them to leverage their complementary strengths. As part of this post I have also written some open-source scripts for a robotic arm to solve a pick and place task, similar to our coffee cup examples, using each of the methods discussed. Due to the natural challenges and computational expense of robotic learning this programme also includes pre-trained models that can be downloaded from Hugging Faces. Please feel free to modify and use them as you see fit they principally show how to use the IL and model-free RL methods discussed in this post on the simulated robot.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-02-08 18:56:31 +0000 UTC'>February 8, 2025</span>&nbsp;·&nbsp;28 min&nbsp;·&nbsp;Alexander Quessy</footer>
+  <a class="entry-link" aria-label="post link to Robotic Learning Part 2: Key Learning Paradigms in Robotics" href="http://localhost:1313/deltaq/posts/key-learning-paradigms-in-robotics/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Robotic Learning Part 1: The Physical Reality of Robotic Learning
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>To understand why robot learning is fundamentally different from traditional machine learning, let’s start with a simple example. Imagine teaching a robot to pick up a coffee cup. While a computer vision system needs only to identify the cup in an image, a robot must answer a series of increasingly complex questions: Where exactly is the cup? How should I move to grasp it? How hard should I grip it? What if it’s fuller or emptier than expected?
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-02-08 18:25:16 +0000 UTC'>February 8, 2025</span>&nbsp;·&nbsp;7 min&nbsp;·&nbsp;Alexander Quessy</footer>
+  <a class="entry-link" aria-label="post link to Robotic Learning Part 1: The Physical Reality of Robotic Learning" href="http://localhost:1313/deltaq/posts/foundations-of-robotic-learning/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Robotic Learning for Curious People
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>In 1988, roboticist Hans Moravec made an observation: skills that humans find effortless, like picking up a coffee cup or walking on uneven ground, are incredibly difficult for robots. Meanwhile, tasks we find mentally challenging, like playing chess or proving theorems, are relatively straightforward for machines. This counterintuitive reality, known as Moravec’s paradox, lies at the heart of why robot learning has become such an exciting and challenging field.
+Think about a toddler learning to manipulate objects. They can quickly figure out how to pick up toys of different shapes, adapt their grip when something is heavier than expected, and learn from their mistakes. These capabilities, represent some of our most sophisticated yet often least appreciated forms of intelligence. As Moravec noted:
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-02-08 16:52:38 +0000 UTC'>February 8, 2025</span>&nbsp;·&nbsp;2 min&nbsp;·&nbsp;Alexander Quessy</footer>
+  <a class="entry-link" aria-label="post link to Robotic Learning for Curious People" href="http://localhost:1313/deltaq/posts/an-overview-of-robotic-learning/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/deltaq/">∇Q</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/deltaq/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=deltaq/livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Robotic Learning Part 1: The Physical Reality of Robotic Learning | ∇Q</title>
+<meta name="keywords" content="">
+<meta name="description" content="To understand why robot learning is fundamentally different from traditional machine learning, let&rsquo;s start with a simple example. Imagine teaching a robot to pick up a coffee cup. While a computer vision system needs only to identify the cup in an image, a robot must answer a series of increasingly complex questions: Where exactly is the cup? How should I move to grasp it? How hard should I grip it? What if it&rsquo;s fuller or emptier than expected?">
+<meta name="author" content="Alexander Quessy">
+<link rel="canonical" href="http://localhost:1313/deltaq/posts/foundations-of-robotic-learning/">
+<link crossorigin="anonymous" href="/deltaq/assets/css/stylesheet.20aa85504f298988d64d4e56b6da40c8235d7e141a3b71dfe711f58ca5c303d0.css" integrity="sha256-IKqFUE8piYjWTU5WttpAyCNdfhQaO3Hf5xH1jKXDA9A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/deltaq/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/deltaq/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/deltaq/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/deltaq/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/deltaq/posts/foundations-of-robotic-learning/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css" 
+        integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ" 
+        crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js" 
+          integrity="sha384-VQ8d8WVFw0yHhCk5E8I86oOhv48xLpnDZx5T9GogA/Y84DcCKWXDmSDfn13bzFZY" 
+          crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js" 
+          integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR" 
+          crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "$", right: "$", display: false}
+        ]
+      });
+    });
+  </script>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        securityLevel: 'loose',});
+    });
+  </script>
+
+
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/deltaq/" accesskey="h" title="∇Q (Alt + H)">∇Q</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/deltaq/posts" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/deltaq/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/deltaq/faq" title="FAQ">
+                    <span>FAQ</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/deltaq/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/deltaq/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Robotic Learning Part 1: The Physical Reality of Robotic Learning
+    </h1>
+    <div class="post-meta"><span title='2025-02-08 18:25:16 +0000 UTC'>February 8, 2025</span>&nbsp;·&nbsp;7 min&nbsp;·&nbsp;Alexander Quessy
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#sequential-decision-making-under-uncertainty" aria-label="Sequential Decision Making Under Uncertainty">Sequential Decision Making Under Uncertainty</a></li>
+                <li>
+                    <a href="#linking-perception-to-action" aria-label="Linking Perception to Action">Linking Perception to Action</a><ul>
+                        
+                <li>
+                    <a href="#state-space" aria-label="State Space">State Space</a></li>
+                <li>
+                    <a href="#action-space" aria-label="Action Space">Action Space</a></li>
+                <li>
+                    <a href="#control-loop" aria-label="Control loop">Control loop</a></li></ul>
+                </li>
+                <li>
+                    <a href="#why-this-matters-for-robotic-learning" aria-label="Why this matters for Robotic Learning?">Why this matters for Robotic Learning?</a></li>
+                <li>
+                    <a href="#references" aria-label="References">References</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>To understand why robot learning is fundamentally different from traditional machine learning, let&rsquo;s start with a simple example. Imagine teaching a robot to pick up a coffee cup. While a computer vision system needs only to identify the cup in an image, a robot must answer a series of increasingly complex questions: Where exactly is the cup? How should I move to grasp it? How hard should I grip it? What if it&rsquo;s fuller or emptier than expected?</p>
+<p>This seemingly simple task illustrates why robot learning isn&rsquo;t just about making predictions, it&rsquo;s about making decisions that have physical consequences.</p>
+<h2 id="sequential-decision-making-under-uncertainty">Sequential Decision Making Under Uncertainty<a hidden class="anchor" aria-hidden="true" href="#sequential-decision-making-under-uncertainty">#</a></h2>
+$$
+\tau = (s_{0}​,a_{0}​,s_{1}​,a_{1}​,...,s_{T}​)
+$$<p>
+where $s_{t}$ represents the state at time $t$ (like the position of the gripper and cup) and $a_{t}$ represents the action taken (like moving the gripper). Each action doesn&rsquo;t just affect the immediate next state action, it can influence the entire future trajectory of the task.</p>
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/Gripper500.gif"
+             style="display: block; margin: 0 auto; "
+             alt="☕️ Gripper"
+        />
+        
+    </figure>
+
+<p>This sequential decision making process is made even more challenging by the fact that robots must deal with uncertainty. These can be generally classified into 3 different types of uncertainty:</p>
+<ol>
+<li>
+<p><strong>Perception Uncertainty</strong>: When a robot observes the world through its sensors, what it sees is incomplete and noisy. Mathematically this can be written as $o_{t} = s_{t} + \epsilon$ where  $s_{t}$ is what the robot should ideally observe, and $\epsilon$ represents noise. Real robots generally combine multiple sensors, each with their own challenges. Examples include:</p>
+<ul>
+<li><a href="https://thepihut.com/products/12mp-imx477-mini-hq-camera-module-for-raspberry-pi?variant=32522522951742&amp;country=GB&amp;currency=GBP&amp;utm_medium=product_sync&amp;utm_source=google&amp;utm_content=sag_organic&amp;utm_campaign=sag_organic&amp;gad_source=1&amp;gbraid=0AAAAADfQ4GFSimkynGqEbghBD6YH13FKL&amp;gclid=EAIaIQobChMIi-6Oid22iwMVNoBQBh0DhB-MEAQYASABEgLt5vD_BwE"><strong>Cameras</strong></a>, provide dense visual information. Computer vision deriving meaningful from digital images is an entire field in itself. In robotics we are usually concerned with any problem that causes the meaning of the image to be distorted, this could be visual occlusions, changes in lighting or changes to the key visual characteristics of the scene.</li>
+<li><a href="https://www.intelrealsense.com/compare-depth-cameras/"><strong>Depth Sensors</strong></a>, measure the distance between to surfaces in a scene. They suffer from similar errors as cameras but are especially susceptible to errors from reflective surfaces and often struggle to detect small objects.</li>
+<li><a href="https://www.ati-ia.com/products/ft/ft_models.aspx?id=mini45"><strong>Force Sensors</strong></a>, measure contact forces. These generally suffer from errors in calibration, either from misalignment or incorrect zero-ing of the force sensor.</li>
+<li><a href="https://netzerprecision.com/products/?utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=Search&amp;utm_content=general&amp;utm_term=hollow%20shaft%20absolute%20encoder&amp;utm_campaign=Netzer+-+Search+General&amp;utm_source=adwords&amp;utm_medium=ppc&amp;hsa_acc=9965475607&amp;hsa_cam=20943823131&amp;hsa_grp=157677495053&amp;hsa_ad=687969984958&amp;hsa_src=g&amp;hsa_tgt=kwd-335054323609&amp;hsa_kw=hollow%20shaft%20absolute%20encoder&amp;hsa_mt=p&amp;hsa_net=adwords&amp;hsa_ver=3&amp;gad_source=1&amp;gbraid=0AAAAACOuESPwjVV6QTy4BXvPT3T52bMk_&amp;gclid=EAIaIQobChMI7Yzi3t22iwMVp5NQBh1QVAC6EAAYASAAEgJXqfD_BwE"><strong>Joint Sensors</strong></a>, measure joint angle or position. Similar to force sensors they are susceptible to errors in calibration and alignment.</li>
+</ul>
+<p>Putting it all together Boston Dynamic&rsquo;s Humanoid Atlas Robot has 40-50 sensors, as you can imagine this means there is a lot of uncertainty they need to deal with in order to understand the state of the robot.
+
+
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="http://localhost:1313/deltaq/blogs/Foundations-of-Robotic-Learning/perception-atlas.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+</figure></p>
+</li>
+<li>
+<p><strong>Action Uncertainty</strong>: Even when a robot knows how to behave, executing that action perfectly is impossible. For example in the simple coffee cup picking task there is still noise from mechanic imperfections, changes in motor temperature, latency in the control system, robotic wear and tear over time.</p>
+</li>
+<li>
+<p><strong>Environment Uncertainty</strong>: The real world is messy and unpredictable. Physical properties can significantly vary the the way the robot needs to behave in our example:</p>
+<ul>
+<li>The material the cup is made from could deform or be slippery</li>
+<li>The cup could have a different mass than expected</li>
+<li>The cup may not be where we expected it to be on the table</li>
+</ul>
+</li>
+</ol>
+<p>Putting this all together, our robotic cup picking up algorithm needs to handle the following functions, each with its own sources of accumulating uncertainty:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">pick_up_cup</span>():
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	cup_position <span style="color:#f92672">=</span> get_cup_position()  <span style="color:#75715e"># Perception</span>
+</span></span><span style="display:flex;"><span>	planned_path <span style="color:#f92672">=</span> plan_motion(cup_position)  <span style="color:#75715e"># Planning</span>
+</span></span><span style="display:flex;"><span>	actual_motion <span style="color:#f92672">=</span> execute_path(planned_path)  <span style="color:#75715e"># Control</span>
+</span></span><span style="display:flex;"><span>	contact_result <span style="color:#f92672">=</span> grip_cup()  <span style="color:#75715e"># Sensing</span>
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> contact_result
+</span></span></code></pre></div><p>This is why robotic learning algorithms need expertise that regular ML algorithms don&rsquo;t:</p>
+<ol>
+<li>They must be robust to noise</li>
+<li>The need to handle partial and imperfect information</li>
+<li>They must adapt to changing conditions</li>
+<li>They need to be cautious when uncertainty is high</li>
+</ol>
+<h2 id="linking-perception-to-action">Linking Perception to Action<a hidden class="anchor" aria-hidden="true" href="#linking-perception-to-action">#</a></h2>
+<p>At its core robot learning requires 3 key components:</p>
+<ul>
+<li>A way to perceive the world</li>
+<li>A way to decide what to do</li>
+<li>A way to execute that action
+With this in mind we can build a general model to account for each of these components.</li>
+</ul>
+<h3 id="state-space">State Space<a hidden class="anchor" aria-hidden="true" href="#state-space">#</a></h3>
+<p>A robot&rsquo;s state space represents everything we can observe in the environment for the coffee picking robot this might include:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>state <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#39;joint_positions&#39;</span>: [<span style="color:#ae81ff">1.2</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">0.5</span>, <span style="color:#ae81ff">1.8</span>],        <span style="color:#75715e"># Where are my joints?</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#39;joint_velocities&#39;</span>: [<span style="color:#ae81ff">0.115</span>, <span style="color:#ae81ff">0.00</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">0.211</span>],  <span style="color:#75715e"># How fast are they moving?</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#39;camera_image&#39;</span>: np<span style="color:#f92672">.</span>array([<span style="color:#f92672">...</span>]),            <span style="color:#75715e"># What do I see?</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#39;force_reading&#39;</span>: [<span style="color:#ae81ff">200.1</span>, <span style="color:#ae81ff">310.2</span>, <span style="color:#ae81ff">0.9</span>],       <span style="color:#75715e"># What do I feel?</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#39;gripper_state&#39;</span>: <span style="color:#e6db74">&#34;OPEN&#34;</span>                     <span style="color:#75715e"># What&#39;s the state of my hand?</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>These states are constantly evolving and encompass a variety of dissimilar data-types.</p>
+<h3 id="action-space">Action Space<a hidden class="anchor" aria-hidden="true" href="#action-space">#</a></h3>
+<p>A robot&rsquo;s action space defines what it can actually do in the environment this might include:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>action <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#39;joint_velocities&#39;</span> <span style="color:#f92672">=</span> [<span style="color:#f92672">-</span><span style="color:#ae81ff">0.13</span>, <span style="color:#ae81ff">0.21</span>, <span style="color:#ae81ff">0.55</span>]  <span style="color:#75715e"># How fast to move each joint</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#39;gripper_command&#39;</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;CLOSE&#34;</span>               <span style="color:#75715e"># How to move my hand</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="control-loop">Control loop<a hidden class="anchor" aria-hidden="true" href="#control-loop">#</a></h3>
+<p>Now that we understand state and action spaces, let&rsquo;s explore how robots use this information to actually make decisions. The key concept here is the control loop - the continuous cycle of perception and control that allows robots to interact with the world.</p>
+<div class="mermaid" style="text-align: center;">
+    
+graph LR
+    A[Observe] --> B[Decide]
+    B --> C[Act]
+    C --> A
+
+    style A fill:#e1f5fe,stroke:#01579b
+    style B fill:#fff3e0,stroke:#e65100
+    style C fill:#e8f5e9,stroke:#1b5e20
+
+</div>
+<p>This control loop becomes far more interesting when we consider how to make decisions under uncertainty. This is where the concept of Markov Decision Processes (MDPs)<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> become helpful. An MDP provides a mathematical framework for making sequential decisions when outcomes are uncertain. In the context of MDPs, at each time-step $t$:</p>
+<ul>
+<li>The robot finds itself in a state $s_{t}$</li>
+<li>It takes an action $a_{t}$, according to some policy $\pi(s_{t})$</li>
+<li>This leads to a new state $s_{t+1}$ with some probability $P(s_{t+1}|s_{t}, a_{t})$</li>
+<li>The robot receives a reward $r(s_{t}, a_{t})$</li>
+</ul>
+<p>The <em>Markov</em> part of the MDP comes from a key assumption:</p>
+<blockquote>
+<p>The next state depends <strong>only</strong> on the current state and action, <strong>not</strong> on the history of how we got here.</p></blockquote>
+<p>Let&rsquo;s unpack what this means for our coffee cup picking robot.</p>
+<p>Imagine our gripper is hovering $10cm$ above the cup. According to the Markov property to predict what happens when we move down $2cm$, we <em>only</em> need to know:</p>
+<ul>
+<li>Current state ($10 cm$ above the cup)</li>
+<li>Current action (move down $2cm$)</li>
+<li>Current sensor readings (force, vision, etc)</li>
+</ul>
+<p>It doesn&rsquo;t matter how we got to this position, whether we just started the task, or if we have been trying for hours, or whether we previously dropped the cup. The trick is that the state needs to include all information that is important to make decisions. So if the number of times we dropped the cup is important to the decisions we make it should be included in our state.</p>
+<p>This turns out to be very helpful. By carefully choosing what information to include in our state, we can capture all relevant history while keeping our problem definition simple and tractable.</p>
+<h2 id="why-this-matters-for-robotic-learning">Why this matters for Robotic Learning?<a hidden class="anchor" aria-hidden="true" href="#why-this-matters-for-robotic-learning">#</a></h2>
+<p>The MDP framework is especially useful for Robotic learning for three key reasons:</p>
+<ol>
+<li><strong>Uncertainty</strong>: MDPs model probabilities explicitly. When grasping a cup, we can express that: &ldquo;closing the gripper has an 80% chance of secure grasp, 15% chance of partial grip, and 5% chance of missing entirely.&rdquo;</li>
+<li><strong>Long-term consequences</strong>: Small errors compound over time. For example, a $1cm$ misalignment during grasping might let us pick up the cup, but could lead to spilling during transport. The MDP framework captures this through its reward structure and state transitions, even though each state transition only depends on the current state (Markov property), the cumulative rewards over the sequence of states let us optimize for successful task completion. A spilled cup means no reward, guiding the policy toward careful movements even if the cup is slightly misaligned.</li>
+<li><strong>Algorithm design</strong>: The MDP framework helps shape how we think about robotic learning problems and building autonomous systems:
+<ul>
+<li>Reinforcement Learning<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> (RL) optimises for long-term rewards across state transitions.</li>
+<li>Model-Predictive Control<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> (MPC) uses explicit models of state transitions to plan sequences of actions.</li>
+<li>Imitation Learning (IL)<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> can learn from human demonstrations by modelling them as optimal MDP solutions.</li>
+</ul>
+</li>
+</ol>
+<h2 id="references">References<a hidden class="anchor" aria-hidden="true" href="#references">#</a></h2>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>R. Bellman, <em>Dynamic Programming</em>. Princeton, NJ: Princeton University Press, 1957&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>R. S. Sutton and A. G. Barto, <em>Reinforcement Learning: An Introduction</em>, 2nd ed. Cambridge, MA: MIT Press, 2018&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>E. F. Camacho and C. Bordons, <em>Model Predictive Control</em>. London, UK: Springer, 2007.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>S. Schaal, <em>Is imitation learning the route to humanoid robots?</em>, Trends Cogn. Sci., vol. 3, no. 6, pp. 233–242, June 1999.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/deltaq/posts/key-learning-paradigms-in-robotics/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Robotic Learning Part 2: Key Learning Paradigms in Robotics</span>
+  </a>
+  <a class="next" href="http://localhost:1313/deltaq/posts/an-overview-of-robotic-learning/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Robotic Learning for Curious People</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/deltaq/">∇Q</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

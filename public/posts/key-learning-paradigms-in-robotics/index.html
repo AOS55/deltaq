@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/deltaq/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=deltaq/livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Robotic Learning Part 2: Key Learning Paradigms in Robotics | ∇Q</title>
+<meta name="keywords" content="">
+<meta name="description" content="In this post, we&rsquo;ll explore the fundamental methods used to teach robots new skills. The three main paradigms we&rsquo;ll explore are:
+
+Imitation Learning: Teaching robots by showing them what to do
+Reinforcement Learning: Letting robots discover solutions through experience
+Supervised Learning: Using labeled data to build core perception and planning capabilities
+
+Each of these approaches tackles the fundamental challenges of robotic learning in different ways, and modern systems often combine them to leverage their complementary strengths. As part of this post I have also written some open-source scripts for a robotic arm to solve a pick and place task, similar to our coffee cup examples, using each of the methods discussed. Due to the natural challenges and computational expense of robotic learning this programme also includes pre-trained models that can be downloaded from Hugging Faces. Please feel free to modify and use them as you see fit they principally show how to use the IL and model-free RL methods discussed in this post on the simulated robot.">
+<meta name="author" content="Alexander Quessy">
+<link rel="canonical" href="http://localhost:1313/deltaq/posts/key-learning-paradigms-in-robotics/">
+<link crossorigin="anonymous" href="/deltaq/assets/css/stylesheet.20aa85504f298988d64d4e56b6da40c8235d7e141a3b71dfe711f58ca5c303d0.css" integrity="sha256-IKqFUE8piYjWTU5WttpAyCNdfhQaO3Hf5xH1jKXDA9A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/deltaq/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/deltaq/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/deltaq/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/deltaq/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/deltaq/posts/key-learning-paradigms-in-robotics/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css" 
+        integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ" 
+        crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js" 
+          integrity="sha384-VQ8d8WVFw0yHhCk5E8I86oOhv48xLpnDZx5T9GogA/Y84DcCKWXDmSDfn13bzFZY" 
+          crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js" 
+          integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR" 
+          crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "$", right: "$", display: false}
+        ]
+      });
+    });
+  </script>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        securityLevel: 'loose',});
+    });
+  </script>
+
+
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/deltaq/" accesskey="h" title="∇Q (Alt + H)">∇Q</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/deltaq/posts" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/deltaq/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/deltaq/faq" title="FAQ">
+                    <span>FAQ</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/deltaq/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/deltaq/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Robotic Learning Part 2: Key Learning Paradigms in Robotics
+    </h1>
+    <div class="post-meta"><span title='2025-02-08 18:56:31 +0000 UTC'>February 8, 2025</span>&nbsp;·&nbsp;28 min&nbsp;·&nbsp;Alexander Quessy
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#imitation-learning" aria-label="Imitation Learning">Imitation Learning</a><ul>
+                        
+                <li>
+                    <a href="#the-main-challenge" aria-label="The Main Challenge">The Main Challenge</a></li>
+                <li>
+                    <a href="#collecting-demonstrations" aria-label="Collecting demonstrations">Collecting demonstrations</a><ul>
+                        
+                <li>
+                    <a href="#teleoperation" aria-label="Teleoperation">Teleoperation</a></li>
+                <li>
+                    <a href="#kinesthetic-demonstrations" aria-label="Kinesthetic Demonstrations">Kinesthetic Demonstrations</a></li>
+                <li>
+                    <a href="#third-person-demonstrations" aria-label="Third Person Demonstrations">Third Person Demonstrations</a></li></ul>
+                </li>
+                <li>
+                    <a href="#learning-from-demonstrations" aria-label="Learning from Demonstrations">Learning from Demonstrations</a><ul>
+                        
+                <li>
+                    <a href="#behaviour-cloninghttpsproceedingsneuripsccpaper1988file812b4ba287f5ee0bc9d43bbf5bbe87fb-paperpdf5-bc" aria-label="Behaviour Cloning5 (BC)">Behaviour Cloning5 (BC)</a></li>
+                <li>
+                    <a href="#generative-adversarial-imitation-learninghttpsarxivorgpdf1606034766-gail" aria-label="Generative Adversarial Imitation Learning6 (GAIL)">Generative Adversarial Imitation Learning6 (GAIL)</a></li>
+                <li>
+                    <a href="#dataset-aggregationhttpswwwricmuedupub_files20114ross-aistats11-noregretpdf7-dagger" aria-label="Dataset Aggregation7 (DAgger)">Dataset Aggregation7 (DAgger)</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#reinforcement-learning" aria-label="Reinforcement Learning">Reinforcement Learning</a><ul>
+                        
+                <li>
+                    <a href="#problem-definition" aria-label="Problem Definition">Problem Definition</a></li>
+                <li>
+                    <a href="#the-main-challenge-1" aria-label="The Main Challenge">The Main Challenge</a></li>
+                <li>
+                    <a href="#model-free-rl" aria-label="Model-Free RL">Model-Free RL</a><ul>
+                        
+                <li>
+                    <a href="#1-value-based-methods" aria-label="1. Value-Based Methods">1. Value-Based Methods</a></li>
+                <li>
+                    <a href="#2-policy-gradient-methods" aria-label="2. Policy Gradient Methods">2. Policy Gradient Methods</a></li>
+                <li>
+                    <a href="#3-actor-critic-methods" aria-label="3. Actor-Critic Methods">3. Actor-Critic Methods</a></li></ul>
+                </li>
+                <li>
+                    <a href="#model-based-rl-mbrl" aria-label="Model-Based RL (MBRL)">Model-Based RL (MBRL)</a><ul>
+                        
+                <li>
+                    <a href="#learning-the-dynamics-model" aria-label="Learning the Dynamics Model">Learning the Dynamics Model</a></li>
+                <li>
+                    <a href="#planning-based-control" aria-label="Planning-Based Control">Planning-Based Control</a></li>
+                <li>
+                    <a href="#model-based-policy-learning" aria-label="Model-Based Policy Learning">Model-Based Policy Learning</a></li>
+                <li>
+                    <a href="#challenges-in-mbrl" aria-label="Challenges in MBRL">Challenges in MBRL</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#supervised-learning" aria-label="Supervised Learning">Supervised Learning</a><ul>
+                        
+                <li>
+                    <a href="#visual-perception" aria-label="Visual Perception">Visual Perception</a></li>
+                <li>
+                    <a href="#state-estimation" aria-label="State Estimation">State Estimation</a></li></ul>
+                </li>
+                <li>
+                    <a href="#references" aria-label="References">References</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>In this post, we&rsquo;ll explore the fundamental methods used to teach robots new skills. The three main paradigms we&rsquo;ll explore are:</p>
+<ul>
+<li><strong>Imitation Learning</strong>: Teaching robots by showing them what to do</li>
+<li><strong>Reinforcement Learning</strong>: Letting robots discover solutions through experience</li>
+<li><strong>Supervised Learning</strong>: Using labeled data to build core perception and planning capabilities</li>
+</ul>
+<p>Each of these approaches tackles the fundamental challenges of robotic learning in different ways, and modern systems often combine them to leverage their complementary strengths. As part of this post I have also written some <a href="https://github.com/AOS55/RLFoundations">open-source scripts</a> for a robotic arm to solve a <a href="https://robotics.farama.org/envs/fetch/pick_and_place/">pick and place</a> task, similar to our coffee cup examples, using each of the methods discussed. Due to the natural challenges and computational expense of <a href="https://www.natolambert.com/writing/debugging-mbrl">robotic</a> <a href="https://andyljones.com/posts/rl-debugging.html">learning</a> this programme also includes pre-trained models that can be downloaded from Hugging Faces. Please feel free to modify and use them as you see fit they principally show how to use the IL and model-free RL methods discussed in this post on the simulated robot.</p>
+<h2 id="imitation-learning">Imitation Learning<a hidden class="anchor" aria-hidden="true" href="#imitation-learning">#</a></h2>
+<p>Imagine trying to exactly describe to someone how to pickup a coffee cup. Try describing exactly how to pick up the cup, accounting for every finger position, force applied, and possible cup variation. It would be almost impossible, it is far easier to simply show someone how to pick up a coffee cup and have them watch you. This intuition, that some tasks are better shown than described - is the core idea behind Imitation Learning (IL).</p>
+<h3 id="the-main-challenge">The Main Challenge<a hidden class="anchor" aria-hidden="true" href="#the-main-challenge">#</a></h3>
+<p>At first glance, IL may seem straightforward: show the robot what to do, and have it copy those actions. The main problem is even if we demonstrate the task perfectly hundreds of times the robot needs to generalise across various initial conditions, in our coffee cup example this could be:</p>
+<ul>
+<li>Different cup positions and orientations</li>
+<li>Varying lighting conditions</li>
+<li>Different cup sizes, shapes and materials</li>
+<li>Different table heights and surface materials</li>
+</ul>
+<p>IL isn&rsquo;t just about copying demonstrations exactly, it is about extracting the underlying logic that makes the task successful. This generally follows a sequential process of:</p>
+<ol>
+<li>Collect demonstrations</li>
+<li>Learn a mapping from states to actions that captures underlying behaviour</li>
+<li>Handle generalisation by fine-tuning to unseen demonstrations online.</li>
+</ol>
+<h3 id="collecting-demonstrations">Collecting demonstrations<a hidden class="anchor" aria-hidden="true" href="#collecting-demonstrations">#</a></h3>
+<p>The first question that arises is how to generate samples that can be used for training, these will generally be task and user specific, some common examples include:</p>
+<h4 id="teleoperation">Teleoperation<a hidden class="anchor" aria-hidden="true" href="#teleoperation">#</a></h4>
+<p>Teleoperation<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> lets operators control robots remotely via VR controllers and joysticks, enabling safe data collection and precise control while protecting operators. However, interface limitations like latency and reduced sensory feedback can restrict the operator&rsquo;s ability to perform complex manipulations.</p>
+
+
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/groot-teleoperation.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <figcaption>
+        <p>Figure 1: <a href="https://www.youtube.com/watch?v=Bhg3uOx9ZPw">NVIDIA Groot</a>, teleoperation of a humanoid robot.</p>
+    </figcaption>
+    
+</figure>
+<h4 id="kinesthetic-demonstrations">Kinesthetic Demonstrations<a hidden class="anchor" aria-hidden="true" href="#kinesthetic-demonstrations">#</a></h4>
+<p>Kinesthetic<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> teaching enables operators to physically guide robot movements by hand, providing natural and intuitive demonstrations of desired behaviours. While particularly effective for teaching fine-grained manipulation tasks, this method is limited by physical accessibility requirements and operator fatigue.</p>
+
+
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/kinesthetic-wood.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <figcaption>
+        <p>Figure 2: <a href="https://www.youtube.com/watch?v=psaiT0D9Ag0">Wood Planing</a>, kinesthetic programming by demonstration (Alberto Montebelli, Franz Steinmetz and Ville Kyrki Intelligent Robotics - Aalto University, Helsinki).</p>
+    </figcaption>
+    
+</figure>
+<h4 id="third-person-demonstrations">Third Person Demonstrations<a hidden class="anchor" aria-hidden="true" href="#third-person-demonstrations">#</a></h4>
+<p><a href="https://faculty.cc.gatech.edu/~danfei/corl24.pdf">Third-person demonstrations</a> capture human task execution through video recording, allowing efficient collection of natural behavioural data. However, translating actions between human and robot perspectives creates challenges in mapping movements accurately. <a href="https://ego4d-data.org">Ego4D</a><sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>, <a href="https://epic-kitchens.github.io/2025">Epic Kitchens</a> <sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> and <a href="https://www.projectaria.com">Meta&rsquo;s Project Aria</a> (shown below) are examples of this.</p>
+
+
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/aria.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <figcaption>
+        <p>Figure 3: <a href="https://www.youtube.com/watch?v=V2uhLW9J_0Y">Meta Project Aria</a> (Dima Damen - University of Bristol).</p>
+    </figcaption>
+    
+</figure>
+<h3 id="learning-from-demonstrations">Learning from Demonstrations<a hidden class="anchor" aria-hidden="true" href="#learning-from-demonstrations">#</a></h3>
+<p>Once we have collected a dataset of demonstrations we need to learn a policy from them. Formally given an expert policy $\pi_{E}$ used to generate a dataset of demonstrations $\mathcal{D}={(s_{i},a_{i})}^{N}_{i=1}$, where $s_{i}$ represents states and $a_{i}$ is the experts actions, the objective of IL is to find a policy $\pi$ that approximates $\pi_{E}$, such that:</p>
+$$
+	\pi^* = \arg\min_{\pi} \mathbb{E}_{(s,a) \sim \mathcal{D}} \big[ \mathcal{L}(\pi(a|s), \pi_E(a|s)) \big]
+$$<p>
+where $\mathcal{L}$ is a loss function measuring the discrepancy between the learned policy $\pi$ and the expert policy $\pi^{*}$.</p>
+<h4 id="behaviour-cloninghttpsproceedingsneuripsccpaper1988file812b4ba287f5ee0bc9d43bbf5bbe87fb-paperpdf5-bc"><a href="https://proceedings.neurips.cc/paper/1988/file/812b4ba287f5ee0bc9d43bbf5bbe87fb-Paper.pdf">Behaviour Cloning</a><sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> (BC)<a hidden class="anchor" aria-hidden="true" href="#behaviour-cloninghttpsproceedingsneuripsccpaper1988file812b4ba287f5ee0bc9d43bbf5bbe87fb-paperpdf5-bc">#</a></h4>
+<p>The simplest approach to imitation learning is simply to treat it as a supervised learning problem. Given demonstrations $\tau=(s_{t},a_{t})$, BC directly learns a mapping $\pi_{\theta}(s)\rightarrow a$ by minimising:</p>
+$$
+	\mathcal{L}_{\text{BC}}(\theta) = \mathbb{E}_{(s, a) \sim \tau} [|| \pi_{\theta}(s) - a ||^{2}]
+$$
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/BC.svg"
+             style="display: block; margin: 0 auto; height: 200px;"
+             alt="Figure 4: BC training process. Demonstrations are initially collected using the oracle $\pi_{E}$ and then trained using supervised learning based on this dataset."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 4: BC training process. Demonstrations are initially collected using the oracle $\pi_{E}$ and then trained using supervised learning based on this dataset.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p>The main problem with pure BC is <em>distributional shift</em>, where small errors accumulate over time as the policy encounters states unseen during training.</p>
+<h4 id="generative-adversarial-imitation-learninghttpsarxivorgpdf1606034766-gail"><a href="https://arxiv.org/pdf/1606.03476">Generative Adversarial Imitation Learning</a><sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup> (GAIL)<a hidden class="anchor" aria-hidden="true" href="#generative-adversarial-imitation-learninghttpsarxivorgpdf1606034766-gail">#</a></h4>
+<p>GAIL frames IL as a distributional matching problem between policy and expert trajectories using <a href="https://arxiv.org/pdf/1406.2661">adversarial learning</a> GAIL learns:</p>
+<ul>
+<li>A discriminator $D$ that aims to distinguish between expert and policy generated state-action pairs.</li>
+<li>A policy $\pi$, trained to maximise the discriminator confusion.</li>
+</ul>
+<p>GAIL&rsquo;s optimisation objective is written as:</p>
+$$
+	\min_{\pi} ​\max_{​D} \mathbb{E}_{\pi}​[\log(D(s_{t}, a_{t}))]+\mathbb{E}_{\pi_{E}}​[\log(1−D(s_{t},a_{t}))]−\lambda H(\pi)
+$$<p>where $H(\pi)$ is a policy entropy regularization term for exploration.</p>
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/GAIL.svg"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 5: GAIL training process. The dataset $\mathcal{D}$ is initialized with data from the expert policy $\pi_{E}$, data generated by the adversary is labelled $(s_{t}, a_{t})_{1}$ and $(s_{t}, a_{t})_{0}$ from the policy $\pi_{\theta}$."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 5: GAIL training process. The dataset $\mathcal{D}$ is initialized with data from the expert policy $\pi_{E}$, data generated by the adversary is labelled $(s_{t}, a_{t})_{1}$ and $(s_{t}, a_{t})_{0}$ from the policy $\pi_{\theta}$.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h4 id="dataset-aggregationhttpswwwricmuedupub_files20114ross-aistats11-noregretpdf7-dagger"><a href="https://www.ri.cmu.edu/pub_files/2011/4/Ross-AISTATS11-NoRegret.pdf">Dataset Aggregation</a><sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup> (DAgger)<a hidden class="anchor" aria-hidden="true" href="#dataset-aggregationhttpswwwricmuedupub_files20114ross-aistats11-noregretpdf7-dagger">#</a></h4>
+<p>DAgger aims to address distributional shift by iteratively collecting corrective demonstrations, this can be written as:</p>
+$$
+    \begin{align*}
+        & \textbf{Initialize: } \text{Train } \pi_1 \text{ on expert demonstrations } \mathcal{D}_0 \\
+        & \textbf{for } i = 1,2,\dots,N \textbf{ do:} \\
+        & \quad \text{Execute } \pi_i \text{ to collect states } \{s_1, s_2, \dots, s_n\} \\
+        & \quad \text{Query expert for labels: } \mathcal{D}_i = \{(s, \pi_{E}(s))\} \\
+        & \quad \text{Aggregate datasets: } \mathcal{D} = \bigcup_{j=0}^i \mathcal{D}_j \\
+        & \quad \text{Train } \pi_{i+1} \text{ on } \mathcal{D} \text{ using supervised learning} \\
+        & \textbf{end for}
+    \end{align*}
+$$<p>The key problem with DAgger is the need for access to an oracle/expert online to query for expert labels. Variants of Dagger aim to address this and other problems by:</p>
+<ul>
+<li>Selectively querying the expert when confidence is low <a href="https://arxiv.org/pdf/2109.08273">ThriftyDagger</a><sup id="fnref:8"><a href="#fn:8" class="footnote-ref" role="doc-noteref">8</a></sup></li>
+<li>Using filters to prevent the agent executing dangerous actions <a href="https://arxiv.org/pdf/1605.06450">SafeDAgger</a><sup id="fnref:9"><a href="#fn:9" class="footnote-ref" role="doc-noteref">9</a></sup></li>
+<li>Using cost-to-go estimates to improve long-term horizon decision making <a href="https://arxiv.org/pdf/1406.5979">AggreVaTe</a><sup id="fnref:10"><a href="#fn:10" class="footnote-ref" role="doc-noteref">10</a></sup></li>
+</ul>
+<h2 id="reinforcement-learning">Reinforcement Learning<a hidden class="anchor" aria-hidden="true" href="#reinforcement-learning">#</a></h2>
+<p>While IL relies on demonstrations to teach robots, Reinforcement Learning (RL) takes a fundamentally different yet complementary approach - learning through direct interaction with the environment. Rather than mimicking expert behaviour, RL enables robots to discover optimal solutions through trial and error guided by reward signals.</p>
+<h3 id="problem-definition">Problem Definition<a hidden class="anchor" aria-hidden="true" href="#problem-definition">#</a></h3>
+<p>RL formalises the learning problem as a Markov Decision Process (MDP), defined by the tuple $(S, A, P, R, \gamma)$ where:</p>
+<ul>
+<li>$S$ is the state space (e.g., joint angles, end-effector pose, visual observations).</li>
+<li>$A$ is the action space (e.g., joint velocities, motor torques).</li>
+<li>$P(s_{t+1}|s_{t},a_{t})$ defines the transition dynamics.</li>
+<li>$R(s_t,a_t)$ provides the reward signal.</li>
+<li>$\gamma \in [0,1]$ is a discount factor for future rewards.</li>
+</ul>
+<p>The goal is to learn a policy $\pi(a|s)$ that maximises the expected sum of discounted rewards:</p>
+$$
+J(\pi)=\mathbb{E}_{\tau \sim \pi} \biggl[ \sum_{t=0}^{\infty} \gamma^{t} R(s_{t},a_{t} ) \biggr] .
+$$<h3 id="the-main-challenge-1">The Main Challenge<a hidden class="anchor" aria-hidden="true" href="#the-main-challenge-1">#</a></h3>
+<p>Using our coffee cup example, rather than showing the robot how to grasp, we specify a reward signal - perhaps +1 for a successful grasp and 0 otherwise. This seemingly simple shift introduces several key challenges:</p>
+<ol>
+<li>
+<p><strong>Exploration vs Exploitation</strong>, a robot learning to grasp cups faces a crucial tradeoff: Should it stick with a mediocre but reliable grasp strategy, or try new motions that could either lead to better grasps or costly failures? Too much exploration risks dropping cups, while too little may prevent discovering optimal solutions.</p>
+</li>
+<li>
+<p><strong>Credit Assignment</strong>, when a grasp succeeds, which specific actions in the trajectory were actually crucial for success? The final gripper closure, the approach vector, or the pre-grasp positioning? The delayed nature of the reward makes it difficult to identify which decisions were truly important.</p>
+</li>
+<li>
+<p>The <strong>Reality Gap</strong> between simulation and real-world training. While we can safely attempt millions of grasps in simulation, transferring these policies to physical robots faces numerous challenges:</p>
+<ul>
+<li>Imperfect physics modelling of contact dynamics</li>
+<li>Sensor noise and delays not present in simulation</li>
+<li>Real-world lighting and visual variations</li>
+<li>Physical wear and tear on hardware</li>
+</ul>
+</li>
+</ol>
+<p>These fundamental challenges have driven the development of various RL approaches that we&rsquo;ll explore in the following sections, from model-based methods that learn explicit world models to hierarchical approaches that break down complex tasks into manageable sub-problems.</p>
+<h3 id="model-free-rl">Model-Free RL<a hidden class="anchor" aria-hidden="true" href="#model-free-rl">#</a></h3>
+<p>Model-free methods learn directly from experience, attempting to find optimal policies through trial and error without explicitly modelling how the world works. They can be broadly categorised through three approaches:</p>
+<h4 id="1-value-based-methods">1. Value-Based Methods<a hidden class="anchor" aria-hidden="true" href="#1-value-based-methods">#</a></h4>
+<p>These approaches learn a value function $Q(s,a)$ that predicts the expected sum of future rewards for taking action $a$ in state $s$. The policy is then derived by selecting actions that maximise this value:</p>
+$$
+    \pi(s) = \arg\max_{a} Q(s,a) .
+$$<p>The classic example is <a href="https://web.stanford.edu/class/psych209/Readings/MnihEtAlHassibis15NatureControlDeepRL.pdf">DQN</a><sup id="fnref:11"><a href="#fn:11" class="footnote-ref" role="doc-noteref">11</a></sup>, which uses neural networks to approximate Q-values and was initially trained on <a href="https://www.youtube.com/watch?v=TmPfTpjtdgg">Breakout</a>. Value-based methods work well in discrete action spaces but struggle with continuous actions common in robotics, as maximising $Q(s,a)$ becomes an expensive optimisation problem.</p>
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/CriticUpdate.svg"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 6: Deep-Q learning with replay buffer. The agent samples mini-batches from the replay buffer to update the critic network $Q_{\phi}$, while the target network $Q_{\phi}^{T}$ is periodically updated to stabilize the training."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 6: Deep-Q learning with replay buffer. The agent samples mini-batches from the replay buffer to update the critic network $Q_{\phi}$, while the target network $Q_{\phi}^{T}$ is periodically updated to stabilize the training.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h4 id="2-policy-gradient-methods">2. Policy Gradient Methods<a hidden class="anchor" aria-hidden="true" href="#2-policy-gradient-methods">#</a></h4>
+<p>Rather than learning values, these methods directly optimise a policy $\pi_{\theta}(a|s)$ to maximise expected rewards:</p>
+$$
+\nabla_{\theta} J(\pi_\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \biggl[ \sum_{t=0}^T \nabla_{\theta} \log \pi_{\theta}(a_{t}|s_{t}) R(\tau) \biggr]
+$$<p>Policy gradients can naturally handle continuous actions and directly optimise the desired behaviour. However, they often suffer from high variance in gradient estimates, leading to unstable training. This high variance occurs because the algorithm needs to estimate expected returns using a limited number of sampled trajectories, and the correlation between actions and future returns becomes increasingly noisy over long horizons.</p>
+<p>Several key innovations have been proposed to address this variance problem:</p>
+<ul>
+<li><a href="https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html#baselines-in-policy-gradients"><strong>Baselines</strong></a>: Subtracting a state-dependent baseline $b(s)$ from returns reduces variance without introducing bias:$$ \nabla_{\theta} J(\pi_\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \biggl[ \sum_{t=0}^T \nabla_{\theta} \log \pi_{\theta}(a_{t}|s_{t}) (R(\tau) - b(s_t)) \biggr].$$</li>
+<li><a href="https://arxiv.org/pdf/1506.02438"><strong>Advantage estimation</strong></a><sup id="fnref:12"><a href="#fn:12" class="footnote-ref" role="doc-noteref">12</a></sup> : Instead of using full returns, we can estimate the advantage $A(s,a) = Q(s,a) - V(s)$ of actions to reduce variance while maintaining unbiased gradients.</li>
+<li><a href="http://proceedings.mlr.press/v37/schulman15.pdf"><strong>Trust regions</strong></a><sup id="fnref:13"><a href="#fn:13" class="footnote-ref" role="doc-noteref">13</a></sup> : TRPO constrains policy updates to prevent destructively large changes by enforcing a KL divergence constraint between old and new policies.</li>
+<li><a href="https://arxiv.org/pdf/1707.06347"><strong>PPO&rsquo;s clipped objective</strong></a><sup id="fnref:14"><a href="#fn:14" class="footnote-ref" role="doc-noteref">14</a></sup> : Simplifies TRPO by clipping the policy ratio instead of using a hard constraint, providing similar benefits with simpler implementation.</li>
+</ul>
+<p>These improvements have made policy gradient methods far more practical for robotic learning, though they still typically require more samples than value-based approaches.</p>
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/PolicyUpdate.svg"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 7: Policy gradient update with replay buffer. The agent stores transition tuples $(s_{t}, a_{t}, r_{t})$ in the buffer and samples mini-batches to update the policy, optimizing actions $a_{t}$ for given state $s_{t}$."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 7: Policy gradient update with replay buffer. The agent stores transition tuples $(s_{t}, a_{t}, r_{t})$ in the buffer and samples mini-batches to update the policy, optimizing actions $a_{t}$ for given state $s_{t}$.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h4 id="3-actor-critic-methods">3. Actor-Critic Methods<a hidden class="anchor" aria-hidden="true" href="#3-actor-critic-methods">#</a></h4>
+<p>Actor-critic methods combine the advantages of both approaches:</p>
+<ul>
+<li>An <em>actor</em> (policy) $\pi_\theta(a|s)$ learns to select actions.</li>
+<li>A <em>critic</em> (value function) $Q_\phi(s,a)$ evaluates those actions.</li>
+</ul>
+<p>These methods aim to address key limitations of both value-based and policy gradient approaches. Value-based methods struggle with continuous actions common in robotics, while policy gradients suffer from high variance and sample inefficiency. Actor-critic methods tackle these challenges by using the critic to provide lower-variance estimates of expected returns while maintaining the actor&rsquo;s ability to handle continuous actions.</p>
+<p><a href="http://proceedings.mlr.press/v80/haarnoja18b/haarnoja18b.pdf"><strong>Soft Actor-Critic</strong></a><sup id="fnref:15"><a href="#fn:15" class="footnote-ref" role="doc-noteref">15</a></sup> (SAC) represents the state-of-the-art in this family, and makes use of several key innovations:</p>
+<ul>
+<li>The <strong>Maximum Entropy Framework</strong> forms the theoretical foundation of SAC, augmenting the standard RL objective with an entropy term. This modification trains the policy to maximise both expected return and entropy simultaneously, automatically trading off exploration vs exploitation. Compared to traditional exploration methods like $\epsilon$-greedy or noise-based approaches, this framework provides greater robustness to hyperparameter choices and enables the discovery of multiple near-optimal behaviors, ultimately leading to better generalization.</li>
+<li><a href="https://papers.nips.cc/paper_files/paper/2010/file/091d584fced301b442654dd8c23b3fc9-Paper.pdf"><strong>Double Q-Learning with Clipped Critics</strong></a><sup id="fnref:16"><a href="#fn:16" class="footnote-ref" role="doc-noteref">16</a></sup>, actor-critic methods have a tendency to overestimate the value of the Q-function, leading to suboptimal policies. SAC addresses this by using two Q-functions and taking the minimum of their estimates to reduce overestimation bias and preventing premature convergence.</li>
+<li>The <a href="https://arxiv.org/pdf/1312.6114"><strong>Reparameterisation Trick</strong></a><sup id="fnref:17"><a href="#fn:17" class="footnote-ref" role="doc-noteref">17</a></sup> improves policy optimization by making the action sampling process differentiable. The policy network outputs the parameters $(\mu, \sigma)$ from a Gaussian distribution over actions, and actions are sampled from the reparameterisation $a = \mu + \sigma \epsilon$, where $\epsilon \sim \mathcal{N}(0,1)$. This allows for direct backpropagation through the policy network, reducing variance in gradient estimates and improving training stability.</li>
+</ul>
+<p>The complete for SAC objective becomes:</p>
+$$
+    J(\pi) = \mathbb{E}_{\tau \sim \pi}\left[\sum_{t=0}^{\infty} \gamma^t (R(s_t,a_t) + \alpha H(\pi(\cdot|s_t)))\right]
+$$<p>where $H(\pi(\cdot|s_t))$ is the entropy of the policy and $\alpha$ balances exploration with exploitation.</p>
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/ACUpdate.svg"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 8: Actor-Critic update with Advantage Estimation and replay buffer. The actor $\pi_{\theta}$ updates its policy using the advantage estimate, $A^{\pi}(s_{t}, a_{t}) = Q^{\pi}(s_{t}, a_{t}) - V^{\pi}(s_{t})$. The target network $Q_{\phi}^{T}$ stabilizes learning by providing periodic updates to the critic."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 8: Actor-Critic update with Advantage Estimation and replay buffer. The actor $\pi_{\theta}$ updates its policy using the advantage estimate, $A^{\pi}(s_{t}, a_{t}) = Q^{\pi}(s_{t}, a_{t}) - V^{\pi}(s_{t})$. The target network $Q_{\phi}^{T}$ stabilizes learning by providing periodic updates to the critic.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p>SAC has become the <a href="https://www.roboticsproceedings.org/rss19/p056.pdf">preferred choice for robotic learning</a><sup id="fnref:18"><a href="#fn:18" class="footnote-ref" role="doc-noteref">18</a></sup> because it:</p>
+<ul>
+<li>Learns efficiently from off-policy data</li>
+<li>Automatically adjusts exploration through entropy maximisation</li>
+<li>Provides stable training across different hyperparameter settings</li>
+<li>Achieves state-of-the-art sample efficiency and asymptotic performance</li>
+</ul>
+<h3 id="model-based-rl-mbrl">Model-Based RL (MBRL)<a hidden class="anchor" aria-hidden="true" href="#model-based-rl-mbrl">#</a></h3>
+<p>Model-based RL aims to improve sample efficiency by learning a dynamics model of the environment and using it for planning or policy learning. The key idea is that if we can predict how our actions affect the world, we can learn more efficiently from limited real-world data.</p>
+<p>The core idea of MBRL can be broken down into three key components:</p>
+<ol>
+<li><strong>Data Collection</strong>: interact with the environment to collect trajectories</li>
+<li><strong>Model Learning</strong>: Train a dynamics model to predict state transitions</li>
+<li><strong>Policy Optimisation</strong>: Use the model to improve the policy through planning or simulation</li>
+</ol>
+<p>Ideally this begins a cycle where better models lead to be to better policies, which in turn collect better data.</p>
+<h4 id="learning-the-dynamics-model">Learning the Dynamics Model<a hidden class="anchor" aria-hidden="true" href="#learning-the-dynamics-model">#</a></h4>
+<p>Given collected transitions we need to learn a function $f_\theta$ that predicts how our actions change the world:</p>
+$$
+\hat{s}_{t+1} = f_\theta(s_t, a_t) \approx P(s_{t+1}|s_t,a_t)
+$$<p>For robotic tasks, this model can take two forms:</p>
+<ul>
+<li>
+<p><strong>Deterministic Models</strong>: Directly predict the next state, like <em>if I close the gripper by 2cm, the cup will move up by 5cm.</em></p>
+</li>
+<li>
+<p><strong>Probabilistic Models</strong>: Capture uncertainty in predictions:</p>
+$$
+        P(s_{t+1}∣s_{t},a_{t})=\mathcal{N} \bigl( \mu_{\theta}(s_{t},a_{t}),\Sigma_{\theta}(s_{t},a_{t}) \bigr) 
+    $$<p>For example, predicting <em>closing the gripper has a 90% chance of stable grasp, 10% chance of knocking the cup over.</em> This type of modelling has proven to be useful for <a href="https://proceedings.neurips.cc/paper_files/paper/2017/file/766ebcd59621e305170616ba3d3dac32-Paper.pdf">safe learning</a>.</p>
+</li>
+</ul>
+<p>Once we have a dynamics model, there are two fundamentally different approaches:</p>
+<h4 id="planning-based-control">Planning-Based Control<a hidden class="anchor" aria-hidden="true" href="#planning-based-control">#</a></h4>
+<p>Planning methods use the model to simulate and evaluate potential future trajectories. The two main approaches are:</p>
+<ol>
+<li>
+<p><a href="https://homes.cs.washington.edu/~bboots/files/InformationTheoreticMPC.pdf"><strong>Model Predictive Control</strong></a><sup id="fnref:19"><a href="#fn:19" class="footnote-ref" role="doc-noteref">19</a></sup> (MPC) repeatedly solves a finite-horizon optimisation problem at each time-step:</p>
+$$
+        a_{t:t+H}​=\arg\max_{a_{t:t+H}}​ \sum_{h=0}^{H} ​r(s_{h}​,a_{h}​) \ \text{where} \ s_{h+1}​=f_{\theta}​(s_{h}​,a_{h}​)
+    $$<p>This optimisation problem is often solved using a sampling-based approaches like <a href="https://web.mit.edu/6.454/www/www_fall_2003/gew/CEtutorial.pdf">Cross-Entropy Method</a> (CEM) or <a href="https://en.wikipedia.org/wiki/CMA-ES">Covariance Matrix Adaptation Evolution Strategy</a> (CMA-ES) which are often favored because they are easily <a href="https://arxiv.org/pdf/2409.07563">parallelisable on GPUs</a> and can optimise nonlinear, high-dimensional action spaces without requiring derivatives of the cost function. These methods iteratively sample and refine candidate action sequences, making them well-suited for complex control tasks. The general MPC process at each time step $t$ is:</p>
+<ol>
+<li>Generate $K$ action sequences:
+$$\{a_{t:t+H}^{(k)}\}_{k=1}^{K}$$</li>
+<li>Simulate trajectories using model: $s_{h+1}^{(k)} = f_{\theta}(s_h^{(k)}, a_h^{(k)})$.</li>
+<li>Execute first action of the best sequence:
+$$ a_t = a_{t:t+H}^{(k)}[0]$$ where $$k^{*} = \arg\max_k \sum_{h=0}^{H} r(s_h^{(k)}, a_h^{(k)}).$$</li>
+</ol>
+
+    
+    
+        <figure class="text-center " style="text-align: center;">
+            <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/CMA-ES.png"
+                 style="display: block; margin: 0 auto; height: 300px;"
+                 alt="Figure 9: Covariance Matrix Adaptation Evolution Strategy (CMA-ES). Black dots represent sampled candidate solutions, while the orange ellipses illustrate the evolving covariance matrix. The algorithm progressively refines its distribution toward the global minima as variance reduces."
+            />
+            
+                <figcaption style="text-align: center; margin-top: 10px;">
+                    
+                    <p style="text-align: center;">Figure 9: Covariance Matrix Adaptation Evolution Strategy (CMA-ES). Black dots represent sampled candidate solutions, while the orange ellipses illustrate the evolving covariance matrix. The algorithm progressively refines its distribution toward the global minima as variance reduces.
+                    
+                    
+                    </p>
+                </figcaption>
+            
+        </figure>
+
+</li>
+<li>
+<p><strong>Gradient-Based Planning</strong> methods use the differentiability of both the learned dynamics model $f_{\theta}$ and the reward function $r(s_{h}, a_{h})$ to compute the gradient of the expected return with respect to the action sequence $a_{t:t+H}$, enabling direct optimisation through gradient descent. Compared to sampling based methods by following the gradient of expected return the planner can rapidly converge to high-value action sequences without extensive random sampling. This is both more computationally efficient precise than sampling based methods. As the continuous optimisation space offers results in more accurate actions for fine control outputs.</p>
+<p>Methods like <a href="https://papers.nips.cc/paper_files/paper/2018/file/3de568f8597b94bda53149c7d7f5958c-Paper.pdf">PETS</a><sup id="fnref:20"><a href="#fn:20" class="footnote-ref" role="doc-noteref">20</a></sup> optimise action sequences directly through gradient descent on the expected return:</p>
+$$
+        J(a_{t:t+H}) = \mathbb{E}_{s_{h+1} \sim f_{\theta}(s_{h}, a_{h}}) \biggl[ \sum_{h=0}^{H} r(s_{h}, a_{h}) \biggr] 
+    $$$$
+        a_{t:t+H}^{*} = \arg \max_{a_{t:t+H}} J(a_{t:t+H})
+    $$<p>Building on this <a href="https://arxiv.org/abs/2301.04104">Dreamer</a> extends gradient-based planning to latent space, where it learns a world model that can be efficiently differentiated through time. By planning in a learned latent space, rather than raw observations, Dreamer can handle high-dimensional inputs whilst maintaining the computational benefits of gradient-based optimisation.</p>
+
+    
+    
+        <figure class="text-center " style="text-align: center;">
+            <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/WM.png"
+                 style="display: block; margin: 0 auto; height: 300px;"
+                 alt="Figure 10: Dreamer recurrent world model with an encoder-decoder structure. The model predicts latent states $z_{t}$ from observations $x_{t}$, generating reconstructions $\hat{x}_{t}$. The recurrent module $h_{t}$ captures temporal dependencies, while the model uses latent dynamics to predict future states and inform actions $a_{t}$."
+            />
+            
+                <figcaption style="text-align: center; margin-top: 10px;">
+                    
+                    <p style="text-align: center;">Figure 10: <a href="https://arxiv.org/abs/2301.04104">Dreamer</a> recurrent world model with an encoder-decoder structure. The model predicts latent states $z_{t}$ from observations $x_{t}$, generating reconstructions $\hat{x}_{t}$. The recurrent module $h_{t}$ captures temporal dependencies, while the model uses latent dynamics to predict future states and inform actions $a_{t}$.
+                    
+                    
+                    </p>
+                </figcaption>
+            
+        </figure>
+
+<p>The main problem with all of these methods is how they deal with non-differentiable dynamics or discontinuous rewards, which can lead to sparse optima or unstable gradients. These problems can be addressed with methods like smoothing functions or robust optimisation, but this naturally adds more engineering effort and can harm performance.</p>
+</li>
+</ol>
+<h4 id="model-based-policy-learning">Model-Based Policy Learning<a hidden class="anchor" aria-hidden="true" href="#model-based-policy-learning">#</a></h4>
+<p>Rather than planning actions online, an alternative approach is to leverage the learned dynamics model to train a policy through simulated experiences. This approach combines the sample efficiency of model-based methods with the fast inference of model-free policies.</p>
+<ol>
+<li>
+<p><a href="https://dl.acm.org/doi/pdf/10.1145/122344.122377"><strong>Dynastyle Algorithms</strong></a><sup id="fnref:21"><a href="#fn:21" class="footnote-ref" role="doc-noteref">21</a></sup> mix real and simulated data for policy updates. By mixing experiences from both sources, these methods balance the bias-variance trade-off between potentially imperfect model predictions and limited real-world data. This objective becomes:</p>
+$$
+        J( \pi_{\phi}) = \alpha \mathbb{E}_{(s, a) \sim \mathcal{D}_{\text{real}}} [Q(s, a)] + (1-\alpha)\mathbb{E}_{(s, a) \sim \mathcal{D}_{\text{model}}} [Q(s, a)]
+    $$<p>where $\mathcal{D}_{\text{real}}$ is collected from the real environment and $\mathcal{D}_{\text{model}}$ is generated using the learned model $f_{\theta}$. The mixing coefficient $\alpha$ controls the trade-off between real and simulated data.</p>
+</li>
+<li>
+<p><a href="https://arxiv.org/pdf/1906.08253"><strong>Model Based Policy Optimisation</strong></a><sup id="fnref:22"><a href="#fn:22" class="footnote-ref" role="doc-noteref">22</a></sup> (MBPO) addresses the challenge of compounding prediction errors in learned dynamics models by limiting synthetic rollouts to short horizons. The main insight is that although learned models become unreliable for long-term predictions, they remain accurate for short-term forecasting, making them valuable for generating high-quality synthetic data. To ensure reliability MBPO incorporates two mechanisms to handle two types of uncertainty:</p>
+<ul>
+<li><strong>Aleatoric Uncertainty</strong> is randomness inherent to the enviornment that cannot be reduced by collecting larger quantitys of data. To account for this MBPO models transitions as probabilistic distributions rather than fixed outcomes. Each network outputs a Gaussian distribution over possible next states:</li>
+</ul>
+$$
+        p_\theta^i(s_{t+1}|s_t,a_t) = \mathcal{N}\bigl(\mu_\theta^i(s_t,a_t), \Sigma_\theta^i(s_t,a_t)\bigr)
+    $$<ul>
+<li><strong>Epistemic Uncertainty</strong>, is uncertainty in the model itself and comes from limited or biased training data and can be reduced with better model learning. MBPO handles epistemic uncertainty via an ensemble of models $(p_\theta^1,&hellip;,p_\theta^B)$. During synthetic rollouts, one model is randomly selected for each prediction. This approach ensures that predictions reflect the range of plausible dynamics, avoiding overconfidence in poorly understood regions of the state space.</li>
+</ul>
+<p>The algorithm can be summarized as follows:</p>
+$$
+        \begin{align*}
+        & \textbf{Initialize: } \text{Policy: } \pi_\phi, \text{ Model Ensemble: } \{p_\theta^1,...,p_\theta^B\}, \text{ Replay Buffers: } \{ \mathcal{D}_\text{env}, \mathcal{D}_{\text{model}} \} \\
+        & \textbf{for } N \text{ epochs do:} \\
+        & \quad \text{for } E \text{ steps do:} \\
+        & \quad \quad \text{Take action in environment: } a_t \sim \pi_\phi(s_t) \\
+        & \quad \quad \text{Add to replay buffer: } \mathcal{D}_\text{env} \leftarrow \mathcal{D}_\text{env} \cup \{(s_t, a_t, r_t, s_{t+1})\} \\
+        & \quad \text{for } i = 1,\dots,B \text{ do:} \\
+        & \quad \quad \text{Train } p_\theta^i \text{ on bootstrapped sample from } \mathcal{D}_\text{env} \\
+        & \quad \text{for } M \text{ model rollouts do:} \\
+        & \quad \quad s_t \sim \mathcal{D}_\text{env} \text{ // Sample real state} \\
+        & \quad \quad \text{for } k = 1,\dots,K \text{ steps do:} \\
+        & \quad \quad \quad a_{t+k} \sim \pi_\phi(s_{t+k}) \\
+        & \quad \quad \quad i \sim \text{Uniform}(1,B) \text{ // Sample model from ensemble} \\
+        & \quad \quad \quad s_{t+k+1} \sim p_\theta^i(s_{t+k+1}|s_{t+k}, a_{t+k}) \\
+        & \quad \quad \quad \mathcal{D}_\text{model} \leftarrow \mathcal{D}_\text{model} \cup \{(s_{t+k}, a_{t+k}, r_{t+k}, s_{t+k+1})\} \\
+        & \quad \text{for } G \text{ gradient updates do:} \\
+        & \quad \quad \phi \leftarrow \phi - \lambda_\pi \nabla_\phi J_\pi(\phi, \mathcal{D}_\text{model}) \\
+        & \textbf{end for}
+        \end{align*}
+    $$<p>Where:</p>
+<ul>
+<li>$K$ is the model rollout horizon</li>
+<li>$f_\theta$ is an ensemble of probabilistic neural networks</li>
+<li>$J_\pi$ is the policy optimization objective (often SAC)</li>
+<li>$\lambda_\pi$ is the learning rate</li>
+</ul>
+<p>In practice, MBPO has proven particularly effective for robotic control tasks, where collecting real-world data is expensive.</p>
+</li>
+</ol>
+<h4 id="challenges-in-mbrl">Challenges in MBRL<a hidden class="anchor" aria-hidden="true" href="#challenges-in-mbrl">#</a></h4>
+<p>MBRL faces several fundamental challenges that make it particularly difficult in robotics:</p>
+<ul>
+<li>
+<p><strong>Compounding Model Errors</strong>, are a significant problem in MBRL. A small error in predicting finger position at $t=1$ results in slightly incorrect contact points, which leads to larger errors in predicted contact forces at $t=2$. By $t=10$, the model might predict a successful grasp while in reality the cup has been knocked over. This error accumulation can be expressed formally, given a learned model $f_{\theta}$, this prediction error grows approximately exponentially with horizon $H$:</p>
+$$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where $\epsilon$ is the one-step prediction error.</p>
+</li>
+<li>
+<p><strong>Real-World Physics</strong> presents significant challenges due to its discontinuous nature, especially during object interactions and contacts. Learned models struggle to capture these discontinuities because they must simultaneously handle two distinct regimes: continuous dynamics in free space and discontinuous dynamics during contact. Additionally, the system exhibits high sensitivity to initial conditions, where microscopic variations in parameters like surface friction can lead to macroscopically different outcomes, for instance, determining whether a gripper maintains or loses its grasp on an object. These abrupt transitions between physical states and the sensitive dependence on initial conditions make it particularly challenging to learn and maintain accurate predictive models.</p>
+</li>
+</ul>
+<h2 id="supervised-learning">Supervised Learning<a hidden class="anchor" aria-hidden="true" href="#supervised-learning">#</a></h2>
+<p>A key question in designing robotic systems is whether to pursue an end-to-end approach that learns directly from raw sensory inputs to actions, or decompose the problem into modular components that can be trained independently. End-to-end learning offers the theoretical advantage of learning optimal task-specific representations and avoiding hand-engineered decompositions. The main idea is that by training the entire perception-to-action pipeline jointly, the system can learn representations that are optimally suited for the task.</p>
+<p>Whilst appealing in theory, end-to-end learning faces several practical challenges in real robotics. End-to-end systems typically require vast quantities of task-specific data, as they must learn everything from scratch for each new task. They also tend to be brittle, a change in lighting conditions or robot configuration might require retraining the entire system. But perhaps the most significant challenge is the lack of interpretability, end-to-end systems are often described as <em>black boxes</em> because it is difficult to understand how they arrive at their decisions. This makes it hard to diagnose failures or understand why the system behaves in a particular way.</p>
+<p>In contrast, modular approaches break down the robotic learning problem into specialized components - typically perception, state estimation, planning, and control. Each module can be trained independently using techniques best suited for its specific challenges. This decomposition offers several key advantages:</p>
+<ul>
+<li><strong>Interpretability</strong>: Each module can be understood and debugged independently, making it easier to diagnose failures and understand the system&rsquo;s behavior.</li>
+<li><strong>Reusability</strong>: Modules can be reused across different tasks, reducing the need for task-specific data and speeding up development.</li>
+<li><strong>Robustness</strong>: By breaking the problem into smaller, more manageable components, modular systems tend to be more robust to changes in the environment or robot configuration.</li>
+<li><strong>Sample Efficiency</strong>: By training each module independently, modular systems can leverage domain-specific knowledge and data, reducing the need for vast quantities of task-specific data.</li>
+</ul>
+<p>While IL and RL focus on learning behaviours, Supervised Learning (SL) forms the backbone of many fundamental robotic capabilities. In our coffee cup example, before a robot can even attempt to grasp, it needs to:</p>
+<ul>
+<li>Detect and locate cups in its visual field</li>
+<li>Estimate the cup&rsquo;s pose and orientation</li>
+<li>Predict stable grasp points</li>
+<li>Track its own gripper position</li>
+</ul>
+<p>These perception and state estimation tasks can be handled through supervised learning. Some common SL tasks in robotics include:</p>
+<h3 id="visual-perception">Visual Perception<a hidden class="anchor" aria-hidden="true" href="#visual-perception">#</a></h3>
+<p>Modern robotic systems heavily rely on deep learning for visual perception tasks. Convolutional Neural Networks (CNNs) have revolutionized computer vision, enabling robots to understand complex visual scenes and make decisions based on them based on raw pixels alone. There are several common computer vision tasks in robotics:</p>
+<ul>
+<li><strong>Object Detection</strong> enables robots to identify and localize objects in their environment. Modern architectures have evolved from two-stage detectors like <a href="https://arxiv.org/pdf/1506.01497">Faster R-CNN</a>, which use Region Proposal Networks (RPN) for high accuracy, to single-stage detectors like <a href="https://yolov8.com">YOLO v8</a> that achieve real-time performance crucial for reactive robotic systems. Recent transformer-based approaches like <a href="https://arxiv.org/pdf/2005.12872">DETR</a><sup id="fnref:23"><a href="#fn:23" class="footnote-ref" role="doc-noteref">23</a></sup> have revolutionized the field by removing hand-crafted components such as non-maximum suppression, while few-shot detection methods like <a href="https://arxiv.org/pdf/2108.09017">DeFRCN</a><sup id="fnref:24"><a href="#fn:24" class="footnote-ref" role="doc-noteref">24</a></sup> enable robots to learn new objects from limited examples. These advances directly address critical robotics challenges including: real-time processing requirements, handling partial occlusions in cluttered environments, and adaptation to varying lighting conditions.</li>
+</ul>
+
+
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/YOLO-NAS.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <figcaption>
+        <p>Figure 11: <a href="https://www.comet.com/site/blog/introducing-yolo-nas-a-new-state-of-the-art-for-object-detection/">YOLO-NAS</a> object detection.</p>
+    </figcaption>
+    
+</figure>
+<ul>
+<li><strong>Semantic Segmentation</strong> provides robots with pixel-wise scene understanding, enabling precise differentiation between objects, surfaces, and free space. State-of-the-art approaches like <a href="https://arxiv.org/pdf/1802.02611">DeepLabv3+</a><sup id="fnref:25"><a href="#fn:25" class="footnote-ref" role="doc-noteref">25</a></sup> and <a href="https://arxiv.org/pdf/1807.10165">UNet++</a><sup id="fnref:26"><a href="#fn:26" class="footnote-ref" role="doc-noteref">26</a></sup> provide high-resolution segmentation maps, while efficient architectures like <a href="https://arxiv.org/pdf/1902.04502">FastSCNN</a><sup id="fnref:27"><a href="#fn:27" class="footnote-ref" role="doc-noteref">27</a></sup> enable real-time performance necessary for robot navigation. The emergence of transformer-based models like the <a href="https://segment-anything.com">Segment Anything Model</a><sup id="fnref:28"><a href="#fn:28" class="footnote-ref" role="doc-noteref">28</a></sup> (SAM) has pushed the boundaries of segmentation capability, especially for handling novel objects and complex scenes. Multi-task learning approaches that combine segmentation with depth estimation or instance segmentation provide richer environmental understanding, crucial for tasks ranging from manipulation planning to obstacle avoidance.</li>
+</ul>
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/Segment-Anything.png"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 12: Meta&rsquo;s Segment Anything semantic segmentation model"
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 12: Meta&rsquo;s <a href="https://segment-anything.com">Segment Anything</a> semantic segmentation model
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<ul>
+<li><strong>6D Pose Estimation</strong> enables precise robotic manipulation by providing the exact position ($x$, $y$, $z$) and orientation (roll, pitch, yaw) of objects in a scene. Modern approaches include: direct regression methods like <a href="https://posenet-mobile-robot.github.io">PoseNet</a> to keypoint-based approaches using <a href="https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html">PnP</a>, while neural rendering techniques have emerged to handle challenging cases like symmetric and texture-less objects. Recent innovations in self-supervised learning and category-level pose estimation enable generalisation to <a href="https://arxiv.org/pdf/2312.08344">novel objects</a><sup id="fnref:29"><a href="#fn:29" class="footnote-ref" role="doc-noteref">29</a></sup>, while uncertainty estimation in pose predictions has become increasingly important for robust manipulation planning. Multi-view fusion techniques improve accuracy in complex scenarios, directly translating to more reliable and precise robotic manipulation capabilities in unstructured environments.</li>
+</ul>
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/6DoFPose.png"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 13: Deep Object Pose Estimation for Semantic Robotic Grasping of Household Objects NVIDIA"
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 13: <a href="https://research.nvidia.com/publication/2018-09_deep-object-pose-estimation-semantic-robotic-grasping-household-objects">Deep Object Pose Estimation for Semantic Robotic Grasping of Household Objects</a> NVIDIA
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h3 id="state-estimation">State Estimation<a hidden class="anchor" aria-hidden="true" href="#state-estimation">#</a></h3>
+<p>State estimation acts as a bridge between perception and control in robotics, enabling systems to maintain an accurate understanding of both their internal configuration and relationship to the environment. While classical approaches relied primarily on filtering techniques, modern methods increasingly combine traditional probabilistic frameworks with learned components to handle complex, high-dimensional state spaces and uncertainty quantification. This integration has proven particularly powerful for handling the non-linear dynamics and measurement noise inherent in robotic systems.</p>
+<p><strong>Sensor fusion</strong> in robotics integrates data from multiple sensors, including joint encoders, inertial measurement units (IMUs), and force-torque sensors, to accurately determine a robot&rsquo;s internal configuration. Traditional approaches relied on simple <a href="https://en.wikipedia.org/wiki/Kalman_filter">Kalman filtering</a>, modern robotics demands more sophisticated techniques to handle inherently non-linear system dynamics. <a href="https://uk.mathworks.com/help/fusion/ug/extended-kalman-filters.html">Extended Kalman Filters</a> (EKF) and <a href="https://groups.seas.harvard.edu/courses/cs281/papers/unscented.pdf">Unscented Kalman Filters</a><sup id="fnref:30"><a href="#fn:30" class="footnote-ref" role="doc-noteref">30</a></sup> (UKF) address this challenge by performing recursive state estimation through linearization around current estimates. For applications requiring more robust handling of multi-modal distributions, <a href="https://robots.stanford.edu/papers/thrun.pf-in-robotics-uai02.pdf">particle filters</a> offer an alternative solution, though at higher computational cost. Accurate sensor fusion is particularly critical for complex rigid robots, where precise joint state estimation directly impacts both control performance and operational safety.</p>
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/UKF.png"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 14: Comparison of Gaussian Transformations, from left to right. Actual Sampling captures the true mean and covariance, EKF approximates them with linearization, while the Unscented Transform (UT) uses sigma points for a more accurate nonlinear transformation."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 14: Comparison of Gaussian Transformations, from left to right. Actual Sampling captures the true mean and covariance, EKF approximates them with linearization, while the <a href="https://groups.seas.harvard.edu/courses/cs281/papers/unscented.pdf">Unscented Transform</a> (UT) uses sigma points for a more accurate nonlinear transformation.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p><strong>Visual Inertial Odometry</strong> (VIO) enables mobile robots to estimate their motion by fusing visual and inertial data without relying on external reference points. Modern approaches like <a href="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion?tab=readme-ov-file">VINS-Fusion</a> and <a href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB-SLAM3</a> achieve robust performance by tightly coupling feature-based visual tracking with inertial measurements. Deep learning has enhanced traditional VIO pipelines through learned feature detection, outlier rejection, and uncertainty estimation. End-to-end learned systems like <a href="https://arxiv.org/pdf/1906.11435">DeepVIO</a><sup id="fnref:31"><a href="#fn:31" class="footnote-ref" role="doc-noteref">31</a></sup> demonstrate the potential of pure learning-based approaches, hybrid architectures have emerged as particularly effective, combining the reliability of geometric methods with the adaptability of learned components. These integrated systems are relatively mature and operate reliably in real-time while handling challenging real-world conditions including <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=7557075">rapid movements</a><sup id="fnref:32"><a href="#fn:32" class="footnote-ref" role="doc-noteref">32</a></sup>, <a href="https://rpg.ifi.uzh.ch/docs/ICRA18_Gomez.pdf">variable lighting</a><sup id="fnref1:32"><a href="#fn:32" class="footnote-ref" role="doc-noteref">32</a></sup>, and <a href="https://arxiv.org/pdf/1806.05620">dynamic obstacles</a><sup id="fnref:33"><a href="#fn:33" class="footnote-ref" role="doc-noteref">33</a></sup>.</p>
+
+
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/VIO.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <figcaption>
+        <p>Figure 15: <a href="https://www.youtube.com/watch?v=1qye82aW7nI">VINS-Fusion</a>, visual-inertial state estimation for autonomous applications.</p>
+    </figcaption>
+    
+</figure>
+<p><a href="https://gtsam.org/2020/06/01/factor-graphs.html"><strong>Factor graph optimisation</strong></a> provides a framework for sensor fusion and long-term state estimation in robotics. This approach represents both measurements and state variables as nodes in a graph structure, enabling efficient optimization over historical states to maintain consistency and incorporate loop closure constraints. Modern implementations like <a href="https://gtsam.org">GTSAM</a> and <a href="https://github.com/RainerKuemmerle/g2o">g2o</a> have made these techniques practical for large-scale problems, while recent research has extended the framework to incorporate learned measurement factors. The field continues to advance through developments in <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=6630557">robust optimisation</a><sup id="fnref:34"><a href="#fn:34" class="footnote-ref" role="doc-noteref">34</a></sup> for outlier handling, computationally <a href="https://www.cs.cmu.edu/~kaess/pub/Dellaert17fnt.pdf">efficient marginalisation</a> schemes, and <a href="https://www.ipb.uni-bonn.de/pdfs/Naseer2015Robust.pdf">adaptive uncertainty estimation</a><sup id="fnref:35"><a href="#fn:35" class="footnote-ref" role="doc-noteref">35</a></sup>. These theoretical advances have demonstrated practical impact in several robotic applications, including <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=7747236">Simultaneous Localization And Mapping</a><sup id="fnref:36"><a href="#fn:36" class="footnote-ref" role="doc-noteref">36</a></sup> (SLAM) and object tracking.</p>
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" src="http://localhost:1313/deltaq/blogs/Key-Learning-Paradigms-in-Robotics/GTSAM.png"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 16: GTSAM Structure from Motion"
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 16: GTSAM <a href="https://gtsam.org/tutorials/intro.html">Structure from Motion</a>
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h2 id="references">References<a hidden class="anchor" aria-hidden="true" href="#references">#</a></h2>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>P. F. Hokayem and M. W. Spong, <em>Bilateral Teleoperation: An Historical Survey</em>. Cambridge, UK: Cambridge University Press, 2006.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>D. J. Reinkensmeyer and J. L. Patton, &ldquo;Can Robots Help the Learning of Skilled Actions?,&rdquo; <em>Progress in Brain Research</em>, vol. 192, pp. 81-97, 2009.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>K. Grauman, A. Westbury, E. Byrne, et al., “Ego4D: Around the World in 3,000 Hours of Egocentric Video,” <em>IEEE Conference on Computer Vision and Pattern Recognition</em> (CVPR), 2022.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>D. Damen, H. Doughty, G. M. Farinella, S. Fidler, A. Furnari, E. Kazakos, M. Moltisanti, J. Munro, T. Perrett, W. Price, and M. Wray, “EPIC-KITCHENS-100: Dataset and Challenges for Egocentric Perception,” <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, vol. 43, no. 11, pp. 4115–4131, 2021.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p>D. A. Pomerleau, “ALVINN: An Autonomous Land Vehicle in a Neural Network,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 1, 1989, pp. 305–313.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:6">
+<p>J. Ho and S. Ermon, “Generative Adversarial Imitation Learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 29, 2016, pp. 4565–4573.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:7">
+<p>S. Ross, G. Gordon, and D. Bagnell, “A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning,” in <em>Proceedings of the 14th International Conference on Artificial Intelligence and Statistics</em> (AISTATS), 2011, pp. 627–635.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:8">
+<p>D. Menda, M. Elfar, M. Cubuktepe, M. J. Kochenderfer, and M. Pavone, “ThriftyDAgger: Budget-Aware Novelty and Risk Gating for Interactive Imitation Learning,” in <em>IEEE/RSJ International Conference on Intelligent Robots and Systems</em> (IROS), 2020, pp. 1165–1172.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:9">
+<p>A. Zhang and D. Held, “SafeDAgger: Safely Interacting with Human Teachers in Deep Learning for Robotics,” in <em>IEEE International Conference on Robotics and Automation</em> (ICRA), 2017, pp. 614–621.&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:10">
+<p>S. Ross and D. Bagnell, “Reinforcement and Imitation Learning via Interactive No-Regret Learning,” <em>arXiv preprint arXiv:1406.5979</em>, 2014.&#160;<a href="#fnref:10" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:11">
+<p>V. Mnih, K. Kavukcuoglu, D. Silver, A. A. Rusu, J. Veness, M. G. Bellemare, A. Graves, M. Riedmiller, A. K. Fidjeland, G. Ostrovski, et al., “Human-level control through deep reinforcement learning,” in <em>Nature</em>, vol. 518, no. 7540, pp. 529–533, 2015.&#160;<a href="#fnref:11" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:12">
+<p>J. Schulman, P. Moritz, S. Levine, M. Jordan, and P. Abbeel, “High-Dimensional Continuous Control Using Generalized Advantage Estimation,” in <em>International Conference on Learning Representations</em> (ICLR), 2016.&#160;<a href="#fnref:12" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:13">
+<p>J. Schulman, S. Levine, P. Abbeel, M. Jordan, and P. Moritz, “Trust Region Policy Optimization,” in <em>International Conference on Machine Learning</em> (ICML), 2015.&#160;<a href="#fnref:13" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:14">
+<p>J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proximal Policy Optimization Algorithms,” <em>arXiv preprint arXiv:1707.06347</em>, 2017.&#160;<a href="#fnref:14" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:15">
+<p>T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine, “Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor,” in <em>International Conference on Machine Learning</em> (ICML), 2018, pp. 1861–1870.&#160;<a href="#fnref:15" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:16">
+<p>H. van Hasselt, “Double Q-learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2010, pp. 2613–2621.&#160;<a href="#fnref:16" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:17">
+<p>D. P. Kingma and M. Welling, “Auto-Encoding Variational Bayes,” in <em>International Conference on Learning Representations</em> (ICLR), 2014.&#160;<a href="#fnref:17" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:18">
+<p>L. M. Smith, I. Kostrikov, and S. Levine, “Demonstrating A Walk in the Park: Learning to Walk in 20 Minutes With Model-Free Reinforcement Learning,” in <em>Proceedings of Robotics: Science and Systems</em> (RSS), 2023.&#160;<a href="#fnref:18" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:19">
+<p>G. Williams, A. Aldrich, and E. Theodorou, “Model predictive path integral control: Information theoretic model predictive control,” in <em>IEEE International Conference on Robotics and Automation (ICRA)</em>, 2017, pp. 3192–3199.&#160;<a href="#fnref:19" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:20">
+<p>K. Chua, R. Calandra, R. McAllister, and S. Levine, “Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2018, pp. 4759–4770.&#160;<a href="#fnref:20" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:21">
+<p>Sutton, R. S. (1991). “Dyna, an Integrated Architecture for Learning, Planning, and Reacting.” <em>SIGART Bulletin</em>, 2(4), 160–163.&#160;<a href="#fnref:21" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:22">
+<p>M. Janner, J. Fu, M. Zhang, and S. Levine, “When to Trust Your Model: Model-Based Policy Optimization,” in <em>Advances in Neural Information Processing Systems (NeurIPS)</em>, 2019, pp. 12498–12509.&#160;<a href="#fnref:22" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:23">
+<p>N. Carion, F. Massa, G. Synnaeve, N. Usunier, A. Kirillov, and S. Zagoruyko, “End-to-End Object Detection with Transformers,” arXiv preprint arXiv:2005.12872, 2020.&#160;<a href="#fnref:23" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:24">
+<p>L. Qiao, Y. Zhao, Z. Li, X. Qiu, J. Wu, and C. Zhang, “DeFRCN: Decoupled Faster R-CNN for Few-Shot Object Detection,” arXiv preprint arXiv:2108.09017, 2021.&#160;<a href="#fnref:24" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:25">
+<p>L.-C. Chen, Y. Zhu, G. Papandreou, F. Schroff, and H. Adam, “Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation,” in European Conference on Computer Vision (ECCV), 2018, pp. 833–851.&#160;<a href="#fnref:25" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:26">
+<p>Z. Zhou, M. M. Rahman Siddiquee, N. Tajbakhsh, and J. Liang, “UNet++: A Nested U-Net Architecture for Medical Image Segmentation,” in Deep Learning in Medical Image Analysis and Multimodal Learning for Clinical Decision Support (DLMIA), 2018, pp. 3–11.&#160;<a href="#fnref:26" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:27">
+<p>R. Poudel, S. Liwicki, and R. Cipolla, “Fast-SCNN: Fast Semantic Segmentation Network,” in <em>2019 IEEE International Conference on Computer Vision (ICCV) Workshops</em>, 2019,&#160;<a href="#fnref:27" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:28">
+<p>A. Kirillov, E. Mintun, N. Ravi, H. Mao, C. Rolland, L. Gustafson, T. Xiao, S. Whitehead, A. C. Berg, W.-Y. Chen, and P. Dollár, “Segment Anything,” <em>arXiv preprint arXiv:2304.02643</em>, 2023.&#160;<a href="#fnref:28" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:29">
+<p>B. Wen, W. Yang, J. Kautz, and S. Birchfield, “FoundationPose: Unified 6D Pose Estimation and Tracking of Novel Objects,” in <em>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</em>, 2024.&#160;<a href="#fnref:29" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:30">
+<p>E. A. Wan and R. van der Merwe, “The Unscented Kalman Filter for Nonlinear Estimation,” in <em>Proceedings of the IEEE 2000 Adaptive Systems for Signal Processing, Communications, and Control Symposium (AS-SPCC)</em>, Lake Louise, Alberta, Canada, 2000.&#160;<a href="#fnref:30" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:31">
+<p>L. Han, Y. Lin, G. Du, and S. Lian, “DeepVIO: Self-supervised Deep Learning of Monocular Visual Inertial Odometry using 3D Geometric Constraints,” in <em>2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Macau, China, 2019, pp. 6906-6913, doi: 10.1109/IROS40897.2019.8968467.</em>&#160;<a href="#fnref:31" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:32">
+<p>Qin, P. Li, and S. Shen, “VINS-Mono: A robust and versatile monocular visual-inertial state estimator,” <em>IEEE Transactions on Robotics</em>, 2018.&#160;<a href="#fnref:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:33">
+<p>B. Bescos, J. M. Fácil, J. Civera, and J. Neira, “DynaSLAM: Tracking, Mapping and Inpainting in Dynamic Scenes,” <em>IEEE Robotics and Automation Letters</em>, vol. 3, no. 4, pp. 4076–4083, 2018.&#160;<a href="#fnref:33" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:34">
+<p>P. Agarwal, G. D. Tipaldi, L. Spinello, C. Stachniss, and W. Burgard, “Robust Map Optimization Using Dynamic Covariance Scaling,” in <em>Proceedings of the IEEE International Conference on Robotics and Automation</em> (ICRA), 2013.&#160;<a href="#fnref:34" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:35">
+<p>T. Naseer, M. Ruhnke, C. Stachniss, L. Spinello, and W. Burgard, “Robust Visual SLAM Across Seasons,” in <em>Proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems</em> (IROS), 2015.&#160;<a href="#fnref:35" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:36">
+<p>C. Cadena, L. Carlone, H. Carrillo, Y. Latif, D. Scaramuzza, J. Neira, I. Reid, and J. J. Leonard, “Past, Present, and Future of Simultaneous Localization and Mapping: Toward the Robust-Perception Age,” <em>IEEE Transactions on Robotics</em>, vol. 32, no. 6, pp. 1309–1332, 2016&#160;<a href="#fnref:36" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/deltaq/posts/foundations-of-robotic-learning/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Robotic Learning Part 1: The Physical Reality of Robotic Learning</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/deltaq/">∇Q</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
