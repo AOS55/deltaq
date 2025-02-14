@@ -917,9 +917,10 @@ graph LR
       <link>http://localhost:1313/deltaq/posts/an-overview-of-robotic-learning/</link>
       <pubDate>Sat, 08 Feb 2025 16:52:38 +0000</pubDate><author>alexander@quessy.io (Alexander Quessy)</author>
       <guid>http://localhost:1313/deltaq/posts/an-overview-of-robotic-learning/</guid>
-      <description>&lt;p&gt;In 1988, roboticist Hans Moravec made an observation: skills that humans find effortless, like &lt;a href=&#34;https://www.youtube.com/watch?v=rDxTsjD-dKw&#34;&gt;mixing a drink&lt;/a&gt;, &lt;a href=&#34;https://www.youtube.com/watch?v=E2evC2xTNWg&#34;&gt;making breakfast&lt;/a&gt; or &lt;a href=&#34;https://www.youtube.com/watch?v=g0TaYhjpOfo&#34;&gt;walking on uneven ground&lt;/a&gt;, are incredibly difficult for robots. Meanwhile, tasks we find mentally challenging, like &lt;a href=&#34;https://www.chess.com/terms/alphazero-chess-engine&#34;&gt;playing chess&lt;/a&gt; or &lt;a href=&#34;https://www.nature.com/articles/d41586-025-00406-7&#34;&gt;proving theorems&lt;/a&gt;, are relatively straightforward for machines. This counterintuitive reality, known as Moravec&amp;rsquo;s paradox, lies at the heart of why robot learning has become such an exciting and challenging field.&lt;/p&gt;
-&lt;p&gt;Think about a toddler learning to manipulate objects. They can quickly figure out how to pick up toys of different shapes, adapt their grip when something is heavier than expected, and learn from their mistakes. These capabilities, represent some of our most sophisticated yet often least appreciated forms of intelligence. As Moravec noted:&lt;/p&gt;</description>
-      <content:encoded><![CDATA[<p>In 1988, roboticist Hans Moravec made an observation: skills that humans find effortless, like <a href="https://www.youtube.com/watch?v=rDxTsjD-dKw">mixing a drink</a>, <a href="https://www.youtube.com/watch?v=E2evC2xTNWg">making breakfast</a> or <a href="https://www.youtube.com/watch?v=g0TaYhjpOfo">walking on uneven ground</a>, are incredibly difficult for robots. Meanwhile, tasks we find mentally challenging, like <a href="https://www.chess.com/terms/alphazero-chess-engine">playing chess</a> or <a href="https://www.nature.com/articles/d41586-025-00406-7">proving theorems</a>, are relatively straightforward for machines. This counterintuitive reality, known as Moravec&rsquo;s paradox, lies at the heart of why robot learning has become such an exciting and challenging field.</p>
+      <description>&lt;p&gt;Robot learning combines robotics and machine learning to create systems that learn from experience, rather than following fixed programs. As automation extends into streets, warehouses, and roads, we need robots that can generalise, taking skills learned in one situation and adapting them to the countless new scenarios they&amp;rsquo;ll encounter in the real world. This series explains the key ideas, challenges, and breakthroughs in robot learning, showing how researchers are teaching robots to master flexible, adaptable skills that work across the diverse and unpredictable situations of the real world.&lt;/p&gt;</description>
+      <content:encoded><![CDATA[<p>Robot learning combines robotics and machine learning to create systems that learn from experience, rather than following fixed programs. As automation extends into streets, warehouses, and roads, we need robots that can generalise, taking skills learned in one situation and adapting them to the countless new scenarios they&rsquo;ll encounter in the real world. This series explains the key ideas, challenges, and breakthroughs in robot learning, showing how researchers are teaching robots to master flexible, adaptable skills that work across the diverse and unpredictable situations of the real world.</p>
+<h2 id="introdction">Introdction</h2>
+<p>In 1988, roboticist Hans Moravec made an observation: skills that humans find effortless, like <a href="https://www.youtube.com/watch?v=rDxTsjD-dKw">mixing a drink</a>, <a href="https://www.youtube.com/watch?v=E2evC2xTNWg">making breakfast</a> or <a href="https://www.youtube.com/watch?v=g0TaYhjpOfo">walking on uneven ground</a>, are incredibly difficult for robots. Meanwhile, tasks we find mentally challenging, like <a href="https://www.chess.com/terms/alphazero-chess-engine">playing chess</a> or <a href="https://www.nature.com/articles/d41586-025-00406-7">proving theorems</a>, are relatively straightforward for machines. This counterintuitive reality, known as Moravec&rsquo;s paradox, lies at the heart of why robot learning has become such an exciting and challenging field.</p>
 <p>Think about a toddler learning to manipulate objects. They can quickly figure out how to pick up toys of different shapes, adapt their grip when something is heavier than expected, and learn from their mistakes. These capabilities, represent some of our most sophisticated yet often least appreciated forms of intelligence. As Moravec noted:</p>
 <blockquote>
 <p>We are all prodigious olympians in perceptual and motor areas, so good that we make the difficult look easy.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p></blockquote>
@@ -934,7 +935,7 @@ graph LR
     </div>
     
     <figcaption>
-        <p>A <a href="https://www.youtube.com/watch?v=9d6hiqLtml8">robot placing balls</a> in a pot.</p>
+        <p>Figure 1: A <a href="https://www.youtube.com/watch?v=9d6hiqLtml8">robot placing balls</a> in a pot.</p>
     </figcaption>
     
 </figure>
@@ -949,7 +950,7 @@ graph LR
     </div>
     
     <figcaption>
-        <p>A <a href="https://www.youtube.com/watch?v=pb3aUNl52oQ">baby placing balls</a> in a pot.</p>
+        <p>Figure 2: A <a href="https://www.youtube.com/watch?v=pb3aUNl52oQ">baby placing balls</a> in a box.</p>
     </figcaption>
     
 </figure>
@@ -966,13 +967,21 @@ graph LR
 <h2 id="what-these-posts-cover">What These Posts Cover</h2>
 <p>We&rsquo;ll explore how robot learning is tackling Moravec&rsquo;s paradox:</p>
 <ol>
-<li>The Fundamentals: Why <em>simple</em> robotic tasks are actually complex.</li>
-<li>Learning Paradigms: How to teach robots through demonstrations and experience.</li>
+<li><a href="https://aos55.github.io/deltaq/posts/foundations-of-robotic-learning/">The Fundamentals</a>: Why <em>simple</em> robotic tasks are actually complex.</li>
+<li><a href="https://aos55.github.io/deltaq/posts/key-learning-paradigms-in-robotics/">Learning Paradigms</a>: How to teach robots through demonstrations and experience.</li>
 <li>The Reality Gap: Why simulation alone isn&rsquo;t enough, and what we can do about it.</li>
 <li>Modern Approaches: How new techniques are making headway on these problems.</li>
 <li>Real World Applications: How these techniques are being applied in the real-world.</li>
 </ol>
-<h2 id="references">References</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bibtex" data-lang="bibtex"><span style="display:flex;"><span><span style="color:#a6e22e">@article</span>{quessy2025roboticlearning,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">title</span>   = <span style="color:#e6db74">&#34;Robotic Learning for Curious People&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">author</span>  = <span style="color:#e6db74">&#34;Quessy, Alexander&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">journal</span> = <span style="color:#e6db74">&#34;aos55.github.io/deltaq&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">year</span>    = <span style="color:#e6db74">&#34;2025&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">month</span>   = <span style="color:#e6db74">&#34;Feb&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">url</span>     = <span style="color:#e6db74">&#34;https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="references">References</h2>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
