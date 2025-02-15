@@ -65,7 +65,7 @@ params:
   
   assets:
     favicon: "/favicon.ico"
-    apple_touch_icon: "/apple-touch-icon.png"
+    # apple_touch_icon: "/apple-touch-icon.png"
     katex: true
     mermaid: true
 
