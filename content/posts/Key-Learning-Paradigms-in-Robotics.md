@@ -429,21 +429,21 @@ State estimation acts as a bridge between perception and control in robotics, en
 
 [^1]: P. F. Hokayem and M. W. Spong, _Bilateral Teleoperation: An Historical Survey_. Cambridge, UK: Cambridge University Press, 2006.
 
-[^2]: D. J. Reinkensmeyer and J. L. Patton, "Can Robots Help the Learning of Skilled Actions?," _Progress in Brain Research_, vol. 192, pp. 81-97, 2009.
+[^2]: D. J. Reinkensmeyer and J. L. Patton, "Can Robots Help the Learning of Skilled Actions?," _Progress in Brain Research_, 2009.
 
 [^3]: K. Grauman, A. Westbury, E. Byrne, et al., “Ego4D: Around the World in 3,000 Hours of Egocentric Video,” _IEEE Conference on Computer Vision and Pattern Recognition_ (CVPR), 2022.
 
-[^4]: D. Damen, H. Doughty, G. M. Farinella, S. Fidler, A. Furnari, E. Kazakos, M. Moltisanti, J. Munro, T. Perrett, W. Price, and M. Wray, “EPIC-KITCHENS-100: Dataset and Challenges for Egocentric Perception,” _IEEE Transactions on Pattern Analysis and Machine Intelligence_, vol. 43, no. 11, pp. 4115–4131, 2021.
+[^4]: D. Damen, H. Doughty, G. M. Farinella, S. Fidler, A. Furnari, E. Kazakos, M. Moltisanti, J. Munro, T. Perrett, W. Price, and M. Wray, “EPIC-KITCHENS-100: Dataset and Challenges for Egocentric Perception,” _IEEE Transactions on Pattern Analysis and Machine Intelligence_, 2021.
 
-[^5]: D. A. Pomerleau, “ALVINN: An Autonomous Land Vehicle in a Neural Network,” in _Advances in Neural Information Processing Systems_ (NeurIPS), vol. 1, 1989, pp. 305–313.
+[^5]: D. A. Pomerleau, “ALVINN: An Autonomous Land Vehicle in a Neural Network,” in _Advances in Neural Information Processing Systems_ (NeurIPS), vol. 1, 1989.
 
-[^6]: J. Ho and S. Ermon, “Generative Adversarial Imitation Learning,” in _Advances in Neural Information Processing Systems_ (NeurIPS), vol. 29, 2016, pp. 4565–4573.
+[^6]: J. Ho and S. Ermon, “Generative Adversarial Imitation Learning,” in _Advances in Neural Information Processing Systems_ (NeurIPS), vol. 29, 2016.
 
-[^7]: S. Ross, G. Gordon, and D. Bagnell, “A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning,” in _Proceedings of the 14th International Conference on Artificial Intelligence and Statistics_ (AISTATS), 2011, pp. 627–635.
+[^7]: S. Ross, G. Gordon, and D. Bagnell, “A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning,” in _Proceedings of the 14th International Conference on Artificial Intelligence and Statistics_ (AISTATS), 2011.
 
-[^8]: D. Menda, M. Elfar, M. Cubuktepe, M. J. Kochenderfer, and M. Pavone, “ThriftyDAgger: Budget-Aware Novelty and Risk Gating for Interactive Imitation Learning,” in _IEEE/RSJ International Conference on Intelligent Robots and Systems_ (IROS), 2020, pp. 1165–1172.
+[^8]: D. Menda, M. Elfar, M. Cubuktepe, M. J. Kochenderfer, and M. Pavone, “ThriftyDAgger: Budget-Aware Novelty and Risk Gating for Interactive Imitation Learning,” in _IEEE/RSJ International Conference on Intelligent Robots and Systems_ (IROS), 2020.
 
-[^9]: A. Zhang and D. Held, “SafeDAgger: Safely Interacting with Human Teachers in Deep Learning for Robotics,” in _IEEE International Conference on Robotics and Automation_ (ICRA), 2017, pp. 614–621.
+[^9]: J. Zhang and K. Cho, "Query-Efficient Imitation Learning for End-to-End Autonomous Driving," in _Advancement of Artificial Intelligence_ (AAAI), 2017.
 
 [^10]: S. Ross and D. Bagnell, “Reinforcement and Imitation Learning via Interactive No-Regret Learning,” _arXiv preprint arXiv:1406.5979_, 2014.
 
@@ -455,29 +455,29 @@ State estimation acts as a bridge between perception and control in robotics, en
 
 [^14]: J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proximal Policy Optimization Algorithms,” _arXiv preprint arXiv:1707.06347_, 2017.
 
-[^15]: T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine, “Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor,” in _International Conference on Machine Learning_ (ICML), 2018, pp. 1861–1870.
+[^15]: T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine, “Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor,” in _International Conference on Machine Learning_ (ICML), 2018.
 
-[^16]: H. van Hasselt, “Double Q-learning,” in _Advances in Neural Information Processing Systems_ (NeurIPS), 2010, pp. 2613–2621.
+[^16]: H. van Hasselt, “Double Q-learning,” in _Advances in Neural Information Processing Systems_ (NeurIPS), 2010.
 
 [^17]: D. P. Kingma and M. Welling, “Auto-Encoding Variational Bayes,” in _International Conference on Learning Representations_ (ICLR), 2014.
 
 [^18]: L. M. Smith, I. Kostrikov, and S. Levine, “Demonstrating A Walk in the Park: Learning to Walk in 20 Minutes With Model-Free Reinforcement Learning,” in _Proceedings of Robotics: Science and Systems_ (RSS), 2023.
 
-[^19]: G. Williams, A. Aldrich, and E. Theodorou, “Model predictive path integral control: Information theoretic model predictive control,” in _IEEE International Conference on Robotics and Automation (ICRA)_, 2017, pp. 3192–3199.
+[^19]: G. Williams, A. Aldrich, and E. Theodorou, “Model predictive path integral control: Information theoretic model predictive control,” in _IEEE International Conference on Robotics and Automation (ICRA)_, 2017.
 
-[^20]: K. Chua, R. Calandra, R. McAllister, and S. Levine, “Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models,” in _Advances in Neural Information Processing Systems_ (NeurIPS), 2018, pp. 4759–4770.
+[^20]: K. Chua, R. Calandra, R. McAllister, and S. Levine, “Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models,” in _Advances in Neural Information Processing Systems_ (NeurIPS), 2018.
 
-[^21]: Sutton, R. S. (1991). “Dyna, an Integrated Architecture for Learning, Planning, and Reacting.” _SIGART Bulletin_, 2(4), 160–163.
+[^21]: Sutton, R. S. “Dyna, an Integrated Architecture for Learning, Planning, and Reacting.” 1991.
 
-[^22]: M. Janner, J. Fu, M. Zhang, and S. Levine, “When to Trust Your Model: Model-Based Policy Optimization,” in _Advances in Neural Information Processing Systems (NeurIPS)_, 2019, pp. 12498–12509.
+[^22]: M. Janner, J. Fu, M. Zhang, and S. Levine, “When to Trust Your Model: Model-Based Policy Optimization,” in _Advances in Neural Information Processing Systems (NeurIPS)_, 2019.
 
 [^23]: N. Carion, F. Massa, G. Synnaeve, N. Usunier, A. Kirillov, and S. Zagoruyko, “End-to-End Object Detection with Transformers,” arXiv preprint arXiv:2005.12872, 2020.
 
 [^24]: L. Qiao, Y. Zhao, Z. Li, X. Qiu, J. Wu, and C. Zhang, “DeFRCN: Decoupled Faster R-CNN for Few-Shot Object Detection,” arXiv preprint arXiv:2108.09017, 2021.
 
-[^25]: L.-C. Chen, Y. Zhu, G. Papandreou, F. Schroff, and H. Adam, “Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation,” in European Conference on Computer Vision (ECCV), 2018, pp. 833–851.
+[^25]: L.-C. Chen, Y. Zhu, G. Papandreou, F. Schroff, and H. Adam, “Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation,” in European Conference on Computer Vision (ECCV), 2018.
 
-[^26]: Z. Zhou, M. M. Rahman Siddiquee, N. Tajbakhsh, and J. Liang, “UNet++: A Nested U-Net Architecture for Medical Image Segmentation,” in Deep Learning in Medical Image Analysis and Multimodal Learning for Clinical Decision Support (DLMIA), 2018, pp. 3–11.
+[^26]: Z. Zhou, M. M. Rahman Siddiquee, N. Tajbakhsh, and J. Liang, “UNet++: A Nested U-Net Architecture for Medical Image Segmentation,” in Deep Learning in Medical Image Analysis and Multimodal Learning for Clinical Decision Support (DLMIA), 2018.
 
 [^27]: R. Poudel, S. Liwicki, and R. Cipolla, “Fast-SCNN: Fast Semantic Segmentation Network,” in *2019 IEEE International Conference on Computer Vision (ICCV) Workshops*, 2019,
 
@@ -487,14 +487,14 @@ State estimation acts as a bridge between perception and control in robotics, en
 
 [^30]: E. A. Wan and R. van der Merwe, “The Unscented Kalman Filter for Nonlinear Estimation,” in *Proceedings of the IEEE 2000 Adaptive Systems for Signal Processing, Communications, and Control Symposium (AS-SPCC)*, Lake Louise, Alberta, Canada, 2000.
 
-[^31]: L. Han, Y. Lin, G. Du, and S. Lian, “DeepVIO: Self-supervised Deep Learning of Monocular Visual Inertial Odometry using 3D Geometric Constraints,” in *2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Macau, China, 2019, pp. 6906-6913, doi: 10.1109/IROS40897.2019.8968467.*
+[^31]: L. Han, Y. Lin, G. Du, and S. Lian, “DeepVIO: Self-supervised Deep Learning of Monocular Visual Inertial Odometry using 3D Geometric Constraints,” in *2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Macau, China, 2019.*
 
-[^32]: Qin, P. Li, and S. Shen, “VINS-Mono: A robust and versatile monocular visual-inertial state estimator,” *IEEE Transactions on Robotics*, 2018. 
+[^32]: T. Qin, P. Li, and S. Shen, “VINS-Mono: A robust and versatile monocular visual-inertial state estimator,” *IEEE Transactions on Robotics*, 2018. 
 
-[^33]: B. Bescos, J. M. Fácil, J. Civera, and J. Neira, “DynaSLAM: Tracking, Mapping and Inpainting in Dynamic Scenes,” *IEEE Robotics and Automation Letters*, vol. 3, no. 4, pp. 4076–4083, 2018.
+[^33]: B. Bescos, J. M. Fácil, J. Civera, and J. Neira, “DynaSLAM: Tracking, Mapping and Inpainting in Dynamic Scenes,” *IEEE Robotics and Automation Letters*, 2018.
 
 [^34]: P. Agarwal, G. D. Tipaldi, L. Spinello, C. Stachniss, and W. Burgard, “Robust Map Optimization Using Dynamic Covariance Scaling,” in *Proceedings of the IEEE International Conference on Robotics and Automation* (ICRA), 2013.
 
 [^35]: T. Naseer, M. Ruhnke, C. Stachniss, L. Spinello, and W. Burgard, “Robust Visual SLAM Across Seasons,” in *Proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems* (IROS), 2015.
 
-[^36]: C. Cadena, L. Carlone, H. Carrillo, Y. Latif, D. Scaramuzza, J. Neira, I. Reid, and J. J. Leonard, “Past, Present, and Future of Simultaneous Localization and Mapping: Toward the Robust-Perception Age,” *IEEE Transactions on Robotics*, vol. 32, no. 6, pp. 1309–1332, 2016
+[^36]: C. Cadena, L. Carlone, H. Carrillo, Y. Latif, D. Scaramuzza, J. Neira, I. Reid, and J. J. Leonard, “Past, Present, and Future of Simultaneous Localization and Mapping: Toward the Robust-Perception Age,” *IEEE Transactions on Robotics*, 2016.

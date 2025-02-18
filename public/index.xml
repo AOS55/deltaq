@@ -648,28 +648,28 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>P. F. Hokayem and M. W. Spong, <em>Bilateral Teleoperation: An Historical Survey</em>. Cambridge, UK: Cambridge University Press, 2006.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:2">
-<p>D. J. Reinkensmeyer and J. L. Patton, &ldquo;Can Robots Help the Learning of Skilled Actions?,&rdquo; <em>Progress in Brain Research</em>, vol. 192, pp. 81-97, 2009.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>D. J. Reinkensmeyer and J. L. Patton, &ldquo;Can Robots Help the Learning of Skilled Actions?,&rdquo; <em>Progress in Brain Research</em>, 2009.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:3">
 <p>K. Grauman, A. Westbury, E. Byrne, et al., “Ego4D: Around the World in 3,000 Hours of Egocentric Video,” <em>IEEE Conference on Computer Vision and Pattern Recognition</em> (CVPR), 2022.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:4">
-<p>D. Damen, H. Doughty, G. M. Farinella, S. Fidler, A. Furnari, E. Kazakos, M. Moltisanti, J. Munro, T. Perrett, W. Price, and M. Wray, “EPIC-KITCHENS-100: Dataset and Challenges for Egocentric Perception,” <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, vol. 43, no. 11, pp. 4115–4131, 2021.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>D. Damen, H. Doughty, G. M. Farinella, S. Fidler, A. Furnari, E. Kazakos, M. Moltisanti, J. Munro, T. Perrett, W. Price, and M. Wray, “EPIC-KITCHENS-100: Dataset and Challenges for Egocentric Perception,” <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, 2021.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:5">
-<p>D. A. Pomerleau, “ALVINN: An Autonomous Land Vehicle in a Neural Network,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 1, 1989, pp. 305–313.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>D. A. Pomerleau, “ALVINN: An Autonomous Land Vehicle in a Neural Network,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 1, 1989.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:6">
-<p>J. Ho and S. Ermon, “Generative Adversarial Imitation Learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 29, 2016, pp. 4565–4573.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>J. Ho and S. Ermon, “Generative Adversarial Imitation Learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 29, 2016.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:7">
-<p>S. Ross, G. Gordon, and D. Bagnell, “A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning,” in <em>Proceedings of the 14th International Conference on Artificial Intelligence and Statistics</em> (AISTATS), 2011, pp. 627–635.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>S. Ross, G. Gordon, and D. Bagnell, “A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning,” in <em>Proceedings of the 14th International Conference on Artificial Intelligence and Statistics</em> (AISTATS), 2011.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:8">
-<p>D. Menda, M. Elfar, M. Cubuktepe, M. J. Kochenderfer, and M. Pavone, “ThriftyDAgger: Budget-Aware Novelty and Risk Gating for Interactive Imitation Learning,” in <em>IEEE/RSJ International Conference on Intelligent Robots and Systems</em> (IROS), 2020, pp. 1165–1172.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>D. Menda, M. Elfar, M. Cubuktepe, M. J. Kochenderfer, and M. Pavone, “ThriftyDAgger: Budget-Aware Novelty and Risk Gating for Interactive Imitation Learning,” in <em>IEEE/RSJ International Conference on Intelligent Robots and Systems</em> (IROS), 2020.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:9">
-<p>A. Zhang and D. Held, “SafeDAgger: Safely Interacting with Human Teachers in Deep Learning for Robotics,” in <em>IEEE International Conference on Robotics and Automation</em> (ICRA), 2017, pp. 614–621.&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>J. Zhang and K. Cho, &ldquo;Query-Efficient Imitation Learning for End-to-End Autonomous Driving,&rdquo; in <em>Advancement of Artificial Intelligence</em> (AAAI), 2017.&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:10">
 <p>S. Ross and D. Bagnell, “Reinforcement and Imitation Learning via Interactive No-Regret Learning,” <em>arXiv preprint arXiv:1406.5979</em>, 2014.&#160;<a href="#fnref:10" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -687,10 +687,10 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proximal Policy Optimization Algorithms,” <em>arXiv preprint arXiv:1707.06347</em>, 2017.&#160;<a href="#fnref:14" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:15">
-<p>T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine, “Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor,” in <em>International Conference on Machine Learning</em> (ICML), 2018, pp. 1861–1870.&#160;<a href="#fnref:15" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine, “Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor,” in <em>International Conference on Machine Learning</em> (ICML), 2018.&#160;<a href="#fnref:15" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:16">
-<p>H. van Hasselt, “Double Q-learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2010, pp. 2613–2621.&#160;<a href="#fnref:16" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>H. van Hasselt, “Double Q-learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2010.&#160;<a href="#fnref:16" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:17">
 <p>D. P. Kingma and M. Welling, “Auto-Encoding Variational Bayes,” in <em>International Conference on Learning Representations</em> (ICLR), 2014.&#160;<a href="#fnref:17" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -699,16 +699,16 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>L. M. Smith, I. Kostrikov, and S. Levine, “Demonstrating A Walk in the Park: Learning to Walk in 20 Minutes With Model-Free Reinforcement Learning,” in <em>Proceedings of Robotics: Science and Systems</em> (RSS), 2023.&#160;<a href="#fnref:18" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:19">
-<p>G. Williams, A. Aldrich, and E. Theodorou, “Model predictive path integral control: Information theoretic model predictive control,” in <em>IEEE International Conference on Robotics and Automation (ICRA)</em>, 2017, pp. 3192–3199.&#160;<a href="#fnref:19" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>G. Williams, A. Aldrich, and E. Theodorou, “Model predictive path integral control: Information theoretic model predictive control,” in <em>IEEE International Conference on Robotics and Automation (ICRA)</em>, 2017.&#160;<a href="#fnref:19" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:20">
-<p>K. Chua, R. Calandra, R. McAllister, and S. Levine, “Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2018, pp. 4759–4770.&#160;<a href="#fnref:20" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>K. Chua, R. Calandra, R. McAllister, and S. Levine, “Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2018.&#160;<a href="#fnref:20" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:21">
-<p>Sutton, R. S. (1991). “Dyna, an Integrated Architecture for Learning, Planning, and Reacting.” <em>SIGART Bulletin</em>, 2(4), 160–163.&#160;<a href="#fnref:21" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>Sutton, R. S. “Dyna, an Integrated Architecture for Learning, Planning, and Reacting.” 1991.&#160;<a href="#fnref:21" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:22">
-<p>M. Janner, J. Fu, M. Zhang, and S. Levine, “When to Trust Your Model: Model-Based Policy Optimization,” in <em>Advances in Neural Information Processing Systems (NeurIPS)</em>, 2019, pp. 12498–12509.&#160;<a href="#fnref:22" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>M. Janner, J. Fu, M. Zhang, and S. Levine, “When to Trust Your Model: Model-Based Policy Optimization,” in <em>Advances in Neural Information Processing Systems (NeurIPS)</em>, 2019.&#160;<a href="#fnref:22" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:23">
 <p>N. Carion, F. Massa, G. Synnaeve, N. Usunier, A. Kirillov, and S. Zagoruyko, “End-to-End Object Detection with Transformers,” arXiv preprint arXiv:2005.12872, 2020.&#160;<a href="#fnref:23" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -717,10 +717,10 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>L. Qiao, Y. Zhao, Z. Li, X. Qiu, J. Wu, and C. Zhang, “DeFRCN: Decoupled Faster R-CNN for Few-Shot Object Detection,” arXiv preprint arXiv:2108.09017, 2021.&#160;<a href="#fnref:24" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:25">
-<p>L.-C. Chen, Y. Zhu, G. Papandreou, F. Schroff, and H. Adam, “Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation,” in European Conference on Computer Vision (ECCV), 2018, pp. 833–851.&#160;<a href="#fnref:25" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>L.-C. Chen, Y. Zhu, G. Papandreou, F. Schroff, and H. Adam, “Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation,” in European Conference on Computer Vision (ECCV), 2018.&#160;<a href="#fnref:25" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:26">
-<p>Z. Zhou, M. M. Rahman Siddiquee, N. Tajbakhsh, and J. Liang, “UNet++: A Nested U-Net Architecture for Medical Image Segmentation,” in Deep Learning in Medical Image Analysis and Multimodal Learning for Clinical Decision Support (DLMIA), 2018, pp. 3–11.&#160;<a href="#fnref:26" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>Z. Zhou, M. M. Rahman Siddiquee, N. Tajbakhsh, and J. Liang, “UNet++: A Nested U-Net Architecture for Medical Image Segmentation,” in Deep Learning in Medical Image Analysis and Multimodal Learning for Clinical Decision Support (DLMIA), 2018.&#160;<a href="#fnref:26" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:27">
 <p>R. Poudel, S. Liwicki, and R. Cipolla, “Fast-SCNN: Fast Semantic Segmentation Network,” in <em>2019 IEEE International Conference on Computer Vision (ICCV) Workshops</em>, 2019,&#160;<a href="#fnref:27" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -735,13 +735,13 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>E. A. Wan and R. van der Merwe, “The Unscented Kalman Filter for Nonlinear Estimation,” in <em>Proceedings of the IEEE 2000 Adaptive Systems for Signal Processing, Communications, and Control Symposium (AS-SPCC)</em>, Lake Louise, Alberta, Canada, 2000.&#160;<a href="#fnref:30" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:31">
-<p>L. Han, Y. Lin, G. Du, and S. Lian, “DeepVIO: Self-supervised Deep Learning of Monocular Visual Inertial Odometry using 3D Geometric Constraints,” in <em>2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Macau, China, 2019, pp. 6906-6913, doi: 10.1109/IROS40897.2019.8968467.</em>&#160;<a href="#fnref:31" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>L. Han, Y. Lin, G. Du, and S. Lian, “DeepVIO: Self-supervised Deep Learning of Monocular Visual Inertial Odometry using 3D Geometric Constraints,” in <em>2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Macau, China, 2019.</em>&#160;<a href="#fnref:31" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:32">
-<p>Qin, P. Li, and S. Shen, “VINS-Mono: A robust and versatile monocular visual-inertial state estimator,” <em>IEEE Transactions on Robotics</em>, 2018.&#160;<a href="#fnref:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>T. Qin, P. Li, and S. Shen, “VINS-Mono: A robust and versatile monocular visual-inertial state estimator,” <em>IEEE Transactions on Robotics</em>, 2018.&#160;<a href="#fnref:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:33">
-<p>B. Bescos, J. M. Fácil, J. Civera, and J. Neira, “DynaSLAM: Tracking, Mapping and Inpainting in Dynamic Scenes,” <em>IEEE Robotics and Automation Letters</em>, vol. 3, no. 4, pp. 4076–4083, 2018.&#160;<a href="#fnref:33" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>B. Bescos, J. M. Fácil, J. Civera, and J. Neira, “DynaSLAM: Tracking, Mapping and Inpainting in Dynamic Scenes,” <em>IEEE Robotics and Automation Letters</em>, 2018.&#160;<a href="#fnref:33" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:34">
 <p>P. Agarwal, G. D. Tipaldi, L. Spinello, C. Stachniss, and W. Burgard, “Robust Map Optimization Using Dynamic Covariance Scaling,” in <em>Proceedings of the IEEE International Conference on Robotics and Automation</em> (ICRA), 2013.&#160;<a href="#fnref:34" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -750,7 +750,7 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>T. Naseer, M. Ruhnke, C. Stachniss, L. Spinello, and W. Burgard, “Robust Visual SLAM Across Seasons,” in <em>Proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems</em> (IROS), 2015.&#160;<a href="#fnref:35" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:36">
-<p>C. Cadena, L. Carlone, H. Carrillo, Y. Latif, D. Scaramuzza, J. Neira, I. Reid, and J. J. Leonard, “Past, Present, and Future of Simultaneous Localization and Mapping: Toward the Robust-Perception Age,” <em>IEEE Transactions on Robotics</em>, vol. 32, no. 6, pp. 1309–1332, 2016&#160;<a href="#fnref:36" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>C. Cadena, L. Carlone, H. Carrillo, Y. Latif, D. Scaramuzza, J. Neira, I. Reid, and J. J. Leonard, “Past, Present, and Future of Simultaneous Localization and Mapping: Toward the Robust-Perception Age,” <em>IEEE Transactions on Robotics</em>, 2016.&#160;<a href="#fnref:36" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </div>
