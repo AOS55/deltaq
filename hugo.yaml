@@ -45,8 +45,12 @@ params:
   homeInfoParams:
     Title: "Welcome to ∇Q"  # Added wave emoji like the example
     Content: >
-      Hi, this is Quessy. This blog is a space where I share my notes, projects, and experiments in Machine Learning and Robotics. I hope you find it useful!
+      Hi, I'm Alexander Quessy. Welcome to ∇Q, a place where I explore recent developments and concepts in Machine Learning, Robotics, and Engineering through detailed yet accessible deep dives. Each post aims to make complex technical topics clear and engaging for readers at all levels.
   socialIcons:        # Add social icons like in the example
+    - name: "website"
+      url: "https://aos55.github.io"
+    - name: "email"
+      url: "mailto:alexander@quessy.io"
     - name: "github"
       url: "https://github.com/AOS55"
     - name: "twitter"
