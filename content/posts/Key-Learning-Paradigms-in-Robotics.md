@@ -15,11 +15,11 @@ In this post, we'll explore the fundamental methods used to teach robots new ski
 - **Reinforcement Learning**: Letting robots discover solutions through experience
 - **Supervised Learning**: Using labeled data to build core perception and planning capabilities
 
-Each of these approaches tackles the fundamental challenges of robotic learning in different ways, and modern systems often combine them to leverage their complementary strengths. As part of this post I have also written some [open-source scripts](https://github.com/AOS55/RLFoundations) for a robotic arm to solve a [pick and place](https://robotics.farama.org/envs/fetch/pick_and_place/) task, similar to our coffee cup examples, using each of the methods discussed. Due to the natural challenges and computational expense of [robotic](https://www.natolambert.com/writing/debugging-mbrl) [learning](https://andyljones.com/posts/rl-debugging.html) this programme also includes pre-trained models that can be downloaded from Hugging Faces. Please feel free to modify and use them as you see fit they principally show how to use the IL and model-free RL methods discussed in this post on the simulated robot. 
+Each of these approaches tackles the fundamental challenges of robotic learning in different ways, and modern systems often combine them to leverage their complementary strengths. As part of this post, I have included open-source scripts for a robotic arm that solves a [pick-and-place](https://robotics.farama.org/envs/fetch/pick_and_place/) task (similar to our coffee cup examples) using each of the methods discussed.  These scripts are available on GitHub at [RLFoundations]((https://github.com/AOS55/RLFoundations). Due to the natural challenges and computational expense of [robotic](https://www.natolambert.com/writing/debugging-mbrl) [learning](https://andyljones.com/posts/rl-debugging.html), this repository also includes pre-trained models that can be downloaded from [Hugging Face](https://huggingface.co/collections/AOS55/rlfoundations-67b325988a1b0f0b48d5cb68). Please feel free to modify and use them as you see fit, they primarily demonstrate how to implement the IL and model-free RL methods discussed in this post on the simulated robot.
 
 ## Imitation Learning
 
-Imagine trying to exactly describe to someone how to pickup a coffee cup. Try describing exactly how to pick up the cup, accounting for every finger position, force applied, and possible cup variation. It would be almost impossible, it is far easier to simply show someone how to pick up a coffee cup and have them watch you. This intuition, that some tasks are better shown than described - is the core idea behind Imitation Learning (IL). 
+Imagine trying to exactly describe to someone how to pickup a coffee cup. Try describing exactly how to pick up the cup, accounting for every finger position, force applied, and possible cup variation. It would be almost impossible, it is far easier to simply show someone how to pick up a coffee cup and have them watch you. This intuition, that some tasks are better shown than described, is the core idea behind Imitation Learning (IL). 
 
 ### The Main Challenge
 
@@ -136,7 +136,7 @@ $$
 
 ### The Main Challenge
 
-Using our coffee cup example, rather than showing the robot how to grasp, we specify a reward signal - perhaps +1 for a successful grasp and 0 otherwise. This seemingly simple shift introduces several key challenges:
+Using our coffee cup example, rather than showing the robot how to grasp, we specify a reward signal, perhaps +1 for a successful grasp and 0 otherwise. This seemingly simple shift introduces several key challenges:
 
 1. **Exploration vs Exploitation**, a robot learning to grasp cups faces a crucial tradeoff: Should it stick with a mediocre but reliable grasp strategy, or try new motions that could either lead to better grasps or costly failures? Too much exploration risks dropping cups, while too little may prevent discovering optimal solutions.
 
