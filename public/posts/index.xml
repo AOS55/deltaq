@@ -13,8 +13,609 @@
     <language>en-us</language>
     <managingEditor>alexander@quessy.io (Alexander Quessy)</managingEditor>
     <webMaster>alexander@quessy.io (Alexander Quessy)</webMaster>
-    <lastBuildDate>Sat, 08 Feb 2025 18:56:31 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 03 Mar 2025 12:21:10 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/deltaq/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Robotic Learning Part 3: The Reality Gap</title>
+      <link>http://localhost:1313/deltaq/posts/the-reality-gap/</link>
+      <pubDate>Mon, 03 Mar 2025 12:21:10 +0000</pubDate><author>alexander@quessy.io (Alexander Quessy)</author>
+      <guid>http://localhost:1313/deltaq/posts/the-reality-gap/</guid>
+      <description>&lt;p&gt;Imagine teaching a robot to pick up a coffee cup in a simulation or video game. In this perfect virtual world, the cup&amp;rsquo;s weight is precisely known, the lighting is consistent, and the robot&amp;rsquo;s sensors provide exact measurements. Now try the same task in the real world. The cup might be heavier than expected, it&amp;rsquo;s surface more slippery, the lighting creating unexpected shadows, and the robot&amp;rsquo;s sensors noisy. This disconnect between simulation and reality, known as the &lt;em&gt;reality gap&lt;/em&gt;, is a fundamental challenge in robotic learning.&lt;/p&gt;</description>
+      <content:encoded><![CDATA[<p>Imagine teaching a robot to pick up a coffee cup in a simulation or video game. In this perfect virtual world, the cup&rsquo;s weight is precisely known, the lighting is consistent, and the robot&rsquo;s sensors provide exact measurements. Now try the same task in the real world. The cup might be heavier than expected, it&rsquo;s surface more slippery, the lighting creating unexpected shadows, and the robot&rsquo;s sensors noisy. This disconnect between simulation and reality, known as the <em>reality gap</em>, is a fundamental challenge in robotic learning.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/The-Reality-Gap/Sim2RealRoboticArm.png"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 1: Example of real-world and simulated environments for training a Kinova Arm."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 1: Example of real-world and simulated environments for <a href="https://arxiv.org/pdf/1811.01484">training a Kinova Arm</a>.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p>The appeal of simulation is clear: we can attempt thousands of trials in parallel, experiment without risk of spilling coffee or breaking cups, easily reset the simulation to any starting state, and generate unlimited training data. In-fact it is probably safe to say robotic learning as we know it today would be impossible without simulators. But simulations are approximations and can&rsquo;t perfectly capture the physics of gripping a cup, the variations in cup shapes and materials, or the complexities of real-world sensor noise. This creates a problem:</p>
+<blockquote>
+<p>How do we ensure that skills learned in simulation transfer effectively to the real world?</p></blockquote>
+<p>Researchers have developed three main approaches to address this challenge:</p>
+<ul>
+<li><strong>Improving Simulation Fidelity</strong>: Making simulations more realistic, so there is less of a mismatch between the policy learned in simulation and in the real-world.</li>
+<li><strong>Learning Robust Policies</strong>: Developing algorithms that are inherently adaptable by accounting for sim-to-real differences during training.</li>
+<li><strong>Online Adaptation</strong>: Enabling policies to efficiently adjust to real-world conditions by online fine-tuning.</li>
+</ul>
+<h2 id="making-simulations-more-realistic">Making Simulations more Realistic</h2>
+<p>One approach to bridging the reality gap is to design simulators that better match the real world. The intuition behind why this works is straightforward:</p>
+<blockquote>
+<p>The smaller the difference between simulation and reality, the smaller the reality gap that must be bridged.</p></blockquote>
+<p>If a robot learns to grasp in a <a href="https://projectchrono.org">highly accurate simulation</a> that captures subtle <a href="https://www.sofa-framework.org">physical properties</a> like friction coefficients, <a href="https://deepmind.google/discover/blog/opening-up-a-physics-simulator-for-robotics/">contact dynamics</a>, and <a href="https://developer.nvidia.com/flex">fluid interactions</a>, those skills are more likely to transfer successfully to the real world. However, creating perfect simulations is impossible, there will always be some mismatch with reality. As George Box said, famously:</p>
+<blockquote>
+<p><em>All models are wrong; some are useful.</em> - George Box</p></blockquote>
+<p>But which aspect of reality matters most? Most engineers would be familiar with this approach as defining a problems assumptions or boundary conditions before designing a model. For example in grasping tasks, accurate contact dynamics and friction modelling might be essential, whilst precise visual rendering of shadows is less important. In contrast, for vision-based navigation, accurate lighting models could be critical while precise physics are less important.</p>
+<h3 id="system-identification">System Identification</h3>
+<p><a href="https://uk.mathworks.com/help/ident/gs/about-system-identification.html">System Identification</a> aims to calibrate the parameters within a simulation to match real-world behaviour. This process aims to find the optimal parameters $\mathbf{\xi}^{*}$ that minimise the difference between simulated and real trajectories:</p>
+$$
+	\mathbf{\xi}^{*} = \arg \min_{\mathbf{\xi}} \sum_{t=1}^{T} || s_{t}^{\text{real}} - s_{t}^{sim}(\mathbf{\xi}) ||
+$$<p>
+where $s_{t}^{\text{real}}$ are real-world observations and $s_{t}^{\text{sim}}(\mathbf{\xi})$ are simulated states using parameters $\mathbf{\xi}$.</p>
+<p>This <a href="https://underactuated.mit.edu/sysid.html">process</a> generally involves:</p>
+<ul>
+<li>Collecting real robot trajectories and sensor measurements.</li>
+<li>Selecting simulator parameters (mass, friction coefficients, motor gains, etc) to minimise the difference between the simulated and real-world behaviour.</li>
+<li>Iteratively refining these parameters as more data becomes available.</li>
+</ul>
+<p>While system identification is a powerful approach, it poses unique challenges for learned robotics. The parameters we&rsquo;re trying to identify are deeply intertwined with the learning process itself. As a policy learns and explores new regions of the state space, it encounters different dynamic regimes that may require different parameter values for accurate simulation. This creates a chicken-and-egg problem: we need accurate parameters to learn good policies, but we need policies to explore and gather data for parameter identification. Furthermore, learned policies often exploit subtle dynamics that aren&rsquo;t captured by standard physics models, making it difficult to identify parameters that consistently work across the full range of learned behaviours. This is particularly challenging for contact-rich tasks like manipulation, where small parameter errors can lead to drastically different outcomes in both the learning process and final policy behaviour.</p>
+<p>Larger vehicles, such as <a href="https://arc.aiaa.org/doi/epdf/10.2514/3.20454">planes</a><sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>, <a href="https://www.sciencedirect.com/science/article/abs/pii/S0967066123003842">trains</a> and <a href="https://uk.mathworks.com/help/ident/ug/modeling-a-vehicle-dynamics-system.html">automobiles</a>, that may have high order but generally parameterisable and smooth dynamics system id is often used. For more complex robots the non-linear dynamics introduced by the real-world often pose a challenge and can make system id impractical.</p>
+<h3 id="learned-simulation">Learned Simulation</h3>
+<p>Rather than manually tuning parameters, learned simulation uses real-world data to improve simulator accuracy directly. The main idea is that while physics-based simulators capture fundamental dynamics well, they often miss subtle effects that are difficult to model analytically. Learning can be used to bridge this gap.</p>
+<h4 id="residual-dynamics">Residual Dynamics</h4>
+<p>One approach is to learn a residual dynamics model. These models work by combining a base physics model with a learned component that predicts the difference between the simulated and real-world behaviour. Formally, given a base simulator $f_{\text{sim}}(s_{t}, a_{t})$ and true dynamics $f_{\text{real}}(s_{t}, a_{t})$, we learn a residual model $f_{\text{res}}(s_{t}, a_{t})$ such that:</p>
+$$
+	f_{\text{real}} \approx f_{\text{sim}}(s_{t}, a_{t}) + f_{\text{res}}(s_{t}, a_{t}).
+$$<p><a href="https://arxiv.org/pdf/2303.09597">This approach</a><sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> can be <a href="https://www.research-collection.ethz.ch/bitstream/handle/20.500.11850/335381/contact-iteration-method(4).pdf;jsessionid=42CC2FCAB9E99F21CE2A7468EA8D04E2?sequence=1">very effective</a><sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> because it leverages the prior knowledge of the physics simulator, which is often a far cheaper and easier problem to solve than learning a complete simulator from scratch. For example, in our coffee cup grasping task, the base simulator could handle rigid body dynamics, while the residual learns to correct for joint backlash, motor delays, and complex friction effects.</p>
+<h4 id="differentiable-physics">Differentiable Physics</h4>
+<p>In most of the robotic learning approaches discussed so far we assumed the algorithm learns through trial and error. In our coffee cup example this might involve the robot sometimes gripping too hard and crushing the cup, and sometimes gripping too softly and dropping it. After hundreds or thousands of attempts, it should eventually learn a useful grasp strategy.</p>
+<p>Imagine instead having a mathematical model that can instantly tell the robot: &ldquo;If you move your finger $2mm$ to the left and reduce gripping force by $4.2\text{N}$ the cup will be stable in your grasp without being crushed&rdquo;. This is what differentiable physics simulators offer for robotic learning.</p>
+<p>A differentiable physics simulator creates a mathematical model where every physical interaction, can be calculated and, critically, differentiated. This means the robot can compute exactly how small changes in its actions will affect the outcome of grasping the cup.</p>
+<p>Unlike traditional physics engines with non-differentiable components (like discrete collision detection), differentiable simulators express physical laws as continuously differentiable operations. This mathematical property allows for gradient-based optimisation through the entire physical process, effectively letting the robot &ldquo;see into the future&rdquo; to optimise its actions.</p>
+$$
+	s_{t+1} = f(s_{t}, a_{t}, \xi).
+$$<p>
+The simulator then provides the Jacobian matrices:</p>
+$$
+\biggl[ \frac{\partial s_{t+1}}{\partial s_{t}}, \frac{\partial s_{t+1}}{\partial a_{t}}, \frac{\partial s_{t+1}}{\partial \xi_{t}}  \biggr].
+$$<p>
+These matrices tell us how small changes in the current state, action, or parameters $\theta$ affect the next state. When optimising over time, <a href="https://en.wikipedia.org/wiki/Backpropagation_through_time">BackPropagation Through Time</a> (BPTT) allows gradients to be rolled out for the entire sequence. Enabling the robot to understand how its initial actions influence the final outcome. This is particularly valuable for contact-rich tasks where traditional simulators struggle with discontinuities in the dynamics.</p>
+<p>To actually learn a policy gradient-based optimisation algorithms are often used including:</p>
+<ul>
+<li><a href="https://arxiv.org/pdf/2202.00817"><strong>Policy Optimisation</strong></a> <sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup>, can be used by back-propagating through the simulator:
+$$
+	\nabla_{\theta}J(\xi) = \mathbb{E}_{\xi \sim \Xi} \bigl[ \nabla_{\theta} f(s, a; \xi) \bigr].
+$$
+The gradient of the objective with respect to the policy parameters can be directly computed, rather than relying on purely numerical approximations.</li>
+<li><a href="https://arxiv.org/html/2306.09852v6"><strong>MPC w/ Differentiable Shooting</strong></a><sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup>, unlike traditional MPC, which relies on solving an optimisation problem at each time-step, this approach <a href="https://www.roboticsproceedings.org/rss20/p003.pdf">differentiates through the entire trajectory</a> <sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup> :
+$$
+	\min_{a_{0:T-1}} \sum_{t=0}^{T-1} c(s_{t}, a_{t}) + c_{T}(s_{T}).	
+$$</li>
+<li><strong>Trajectory Optimisation</strong>, gradient based optimisation techniques like <a href="https://www.imgeorgiev.com/2023-02-01-ddp/">Differential Dynamic Programming</a> (DDP) or <a href="https://www.ee.iitb.ac.in/~belur/ee640/optimal-classic-paper.pdf">iterative Linear Quadratic Regularisation</a> (iLQR) become more powerful with differentiable physics as they can compute the exact derivatives of the dynamics rather than using numerical finite difference methods.</li>
+</ul>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/The-Reality-Gap/diff-taichi.gif"
+             style="display: block; margin: 0 auto; "
+             alt="Diff Taichi"
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 2: <a href="https://github.com/taichi-dev/difftaichi">DiffTaichi</a> differentiable programming for physical simulation.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p>Recent frameworks like <a href="https://github.com/google/brax">Brax</a>, <a href="https://nimblephysics.org/">Nimble</a>, and <a href="https://github.com/taichi-dev/difftaichi">DiffTaichi</a> implement efficient differentiable physics that integrate seamlessly with deep learning workflows. For robotics applications, differentiable simulation enables more efficient policy learning, automated system identification, and even physics-based perception, where sensor models can be optimised alongside control policies.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/The-Reality-Gap/brax.gif"
+             style="display: block; margin: 0 auto; "
+             alt="Brax Quadruped"
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 3: <a href="https://github.com/google/brax">Brax</a> differentiable physics simulator for robotics written in JAX.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h3 id="domain-randomisation">Domain Randomisation</h3>
+<p>Instead of trying to make the simulation perfect, <a href="https://arxiv.org/pdf/1703.06907">Domain Randomisation</a><sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup> (DR) encourages imperfection by training with varying simulation parameters. The main idea is that by exposing the policy to a wide range of simulator variations during training, it will learn to focus on task-relevant features while being robust to variations that don&rsquo;t matter.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/The-Reality-Gap/domain_randomization.png"
+             style="display: block; margin: 0 auto; height: 350px;"
+             alt="Figure 4: Domain Randomisation was orginially designed with the objective of training an object detector."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 4: Domain Randomisation was orginially designed with the objective of <a href="https://arxiv.org/html/2410.10017v1">training an object detector</a>.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p>Mathematically, we can express this as training a policy $\pi$ to maximise expected performance across a distribution of environments:</p>
+$$
+	\pi^{*} = \arg \max_{\pi} \mathbb{E}_{\xi \sim p(\xi)} [J(\pi, \xi)]
+$$<p>where $\xi$ represents simulator parameters and $J(\pi, \xi)$ is the performance of a policy $\pi$ in the environment.</p>
+<p>The main idea is that if we randomise enough aspects of the simulation, the real world becomes one possible outcome among many in the distribution. DR is particularly effective because it naturally produces policies robust to real-world variations, eliminates the need for precise physics modelling and requires no real-world training data.</p>
+<p>For the coffee cup example, rather than trying to perfectly model the cup DR might vary:</p>
+<ul>
+<li><strong>Physical Properties</strong>: mass, friction.</li>
+<li><strong>Visual Properties</strong>: cup colours, textures, lighting conditions.</li>
+<li><strong>Sensor Properties</strong>: camera noise, force sensor bias.</li>
+<li><strong>Robot Properties</strong>: joint backlash, motor delays.</li>
+</ul>
+<p>To practically use DR the parameter ranges and distribution types need to be selected carefully. Too broad and the learning process can become inefficient, too narrow and the policy won&rsquo;t be general enough to adapt to the real-world.</p>
+<p>This challenge has led to advanced techniques like adaptive randomisation (automatically tuning ranges based on performance) and structured randomisation (using domain knowledge to guide parameter variations). The core principle remains:</p>
+<blockquote>
+<p>By training across many simulated variations, we can learn policies that transfer to the real world without requiring perfect simulation.</p></blockquote>
+<h2 id="learning-strategies-for-transfer">Learning Strategies for Transfer</h2>
+<p>While improving simulation fidelity helps bridge the reality gap, we can also design learning algorithms that are inherently robust to the sim-to-real transition. Rather than assuming perfect simulation, these approaches focus on learning representations and policies that transfer effectively despite simulation imperfections.</p>
+<h3 id="domain-adaption">Domain Adaption</h3>
+<p><a href="https://arxiv.org/pdf/1409.7495">Domain adaption</a><sup id="fnref:8"><a href="#fn:8" class="footnote-ref" role="doc-noteref">8</a></sup> aims to bridge the sim-to-real gap by teaching robots to recognise and adapt to discrepencies between simulated and real environments. This approach focuses on learning transformations that align the data distributions from both domains. The core idea is simple yet powerful:</p>
+<blockquote>
+<p>Train the robot to focus on features that work consistently across both simulation and reality, while ignoring features that differ between them.</p></blockquote>
+<p>For instance, the robot should learn that the general shape of a cup is important for grasping, while slight differences in texture or lighting are irrelevant.</p>
+<p>Mathematically, domain adaptation works by training neural networks to extract features that minimise the distributional difference between simulation and reality. Formally, given a feature extractor $f_{\theta}$, we aim to learn features where the distributions match:</p>
+$$
+	\min_{\theta} D \bigl( f_{\theta}(x_{sim}) || f_{\theta}(x_{real}) \bigr)
+$$<p>
+where $D$ measures the distributional distance, such as KL-divergence.</p>
+<p>This is often implemented using adversarial training, similar to <a href="https://arxiv.org/pdf/1406.2661">Generative Adversarial Nets</a><sup id="fnref:9"><a href="#fn:9" class="footnote-ref" role="doc-noteref">9</a></sup> (GANs). A discriminator network tries to determine whether features came from simulation or reality, while the feature extractor aims to make this distinction impossible:</p>
+$$
+	\min_{\theta} \max_{D} \mathbb{E}_{x_{\text{sim}}} \Bigl[ \log D \bigl( f_{\theta}(x_{\text{sim}}) \bigr) \Bigr] + \mathbb{E}_{x_{\text{real}}} \Bigl[ 1 - \log D \bigl(f_{\theta} ( x_{\text{real}}) \bigr) \Bigr] .
+$$<p>For adversarial domain randomisation, we go a step further by learning a distribution of simulator parameters $p(\xi)$ that, ideally, produces data indistinguishable from reality:</p>
+$$
+	\min_{p(\xi)} \max_{D} \mathbb{E}_{\xi \sim p(\xi)} \Bigl[ \log D \bigl( x_{\text{sim}}(\xi) \bigr) \Bigr] + \mathbb{E}_{x_{\text{real}}} \Bigl[ 1 - \log D \bigl(f_{\theta} ( x_{\text{real}}) \bigr) \Bigr] .
+$$<p>In practice, this means our coffee-cup-grasping robot learns representations that work equally well in simulation and reality. When transferred to the real world, the robot focuses on the aspects of cup-grasping that remain consistent, making the sim-to-real transition much smoother.</p>
+<p>These methods typically require some real-world data, and can be used in a <a href="https://arxiv.org/pdf/1812.07252">sim-to-real-to-sim</a><sup id="fnref:10"><a href="#fn:10" class="footnote-ref" role="doc-noteref">10</a></sup> cycle. In this framework, policies trained in simulation are deployed in the real-world, and the collected data improves the simulation for subsequent iterations. This cyclical approach creates increasingly robust representations with each iteration. Domain adaptation is particularly powerful when combined with other sim-to-real techniques, as it directly addresses the distributional gap while remaining compatible with methods focused on policy robustness or online adaptation.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/The-Reality-Gap/Sim2RealFood.png"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 5: REPeat uses a Real2Sim2Real approach to improve robot-assisted feeding."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 5: <a href="https://arxiv.org/html/2410.10017v1">REPeat</a> uses a Real2Sim2Real approach to improve robot-assisted feeding.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h3 id="meta-learning">Meta Learning</h3>
+<p><a href="https://lilianweng.github.io/posts/2018-11-30-meta-learning/">Meta-learning</a> offers an alternative approach to the sim-to-real challenge. Rather than focusing on improving simulator fidelity or training robust policies in simulation, meta-learning takes a fundamentally different approach:</p>
+<blockquote>
+<p>Train the robot to quickly adapt to new situations with minimal data.</p></blockquote>
+<p>Think of it as learning adaptability.</p>
+<p>For our coffee cup example, instead of training a robot to master grasping a specific cup in simulation (which may not transfer well to reality), meta-learning trains the robot to understand general grasping principles that enable rapid adaptation when encountering real cups with varying properties, textures, and weights using just a few real-world interactions. The emphasis shifts from perfecting the simulation to developing algorithms that can bridge the reality gap through efficient learning.</p>
+<p>Mathematically meta-learning can be expressed as a two-level optimisation problem:</p>
+$$
+	\min_{\theta} \mathbb{E}_{\mathcal{T} \sim p(\mathcal{T})} [\mathcal{L}_{\mathcal{T}}(A(\theta, \mathcal{T}))]
+$$<p>where $\theta$ is a parameterised policy, $p(\mathcal{T})$ is a distribution over tasks or environments, $A(\theta, \mathcal{T})$ is an adaption process that adjusts $\theta$ for a specific task, and $\mathcal{L}_{\mathcal{T}}$ measures the performance on a task $\mathcal{T}$.</p>
+<p>This formulation summarises the main idea behind meta-learning, we optimise not for direct task performance but on how well the robot can adapt when facing new situations. For sim-to-real, this can be described as the following process:</p>
+$$
+    \begin{align*}
+        & \textbf{Meta-Learning for Sim2Real Transfer} \\
+        & \\
+        & \textbf{Initialize:} \\
+        & \quad \text{Meta-parameters: } \theta \\
+        & \quad \text{Adaptation procedure: } A(\theta, \mathcal{D}) \\
+        & \quad \text{Task distribution: } p(\mathcal{T}) \text{ over simulation parameters} \ \xi \\
+        & \\
+        & \textbf{Simulated Meta-Training:} \\
+        & \textbf{for } \text{iteration} = 1,\dots,N \textbf{ do:} \\
+        & \quad \text{Sample batch of tasks } \{\mathcal{T}_1,\dots,\mathcal{T}_k\} \sim p(\mathcal{T}) \\
+        & \quad \textbf{for each } \mathcal{T}_i \textbf{ do:} \\
+        & \quad\quad \text{Collect simulation trajectories } \mathcal{D}_i \\
+        & \quad\quad \text{Split into } \mathcal{D}^{\text{train}}_i, \mathcal{D}^{\text{test}}_i \\
+        & \quad\quad \text{Adapt parameters: } \theta_i = A(\theta, \mathcal{D}^{\text{train}}_i) \\
+        & \quad\quad \text{Evaluate adapted parameters: } \mathcal{L}_{\mathcal{T}_i}(\theta_i, \mathcal{D}^{\text{test}}_i) \\
+        & \quad \text{Update } \theta \text{ to minimize } \mathbb{E}_{\mathcal{T}_i}[\mathcal{L}_{\mathcal{T}_i}(\theta_i, \mathcal{D}^{\text{test}}_i)] \\
+        & \textbf{end for} \\
+        & \\
+        & \textbf{Real-World Deployment:} \\
+        & \quad \text{Collect small real-world dataset } \mathcal{D}_\text{real} \\
+        & \quad \text{Adapt to real world: } \theta_\text{real} = A(\theta, \mathcal{D}_\text{real}) \\
+        & \quad \text{Deploy adapted policy } \pi_{\theta_\text{real}} \text{ in real environment} \\
+    \end{align*}
+$$<p>In robotics, optimisation based meta-learning approaches have gained the most attention, often based on the <a href="https://arxiv.org/pdf/1703.03400">Model Agnostic Meta Learning</a><sup id="fnref:11"><a href="#fn:11" class="footnote-ref" role="doc-noteref">11</a></sup> (MAML) algorithm. Unlike <a href="https://evolution.ml/pdf/vinyals.pdf">model-based methods</a> that attempt to learn explicit task dynamics or <a href="https://contrib.scikit-learn.org/metric-learn/introduction.html">metric-based approaches</a> that rely on learned distance measures between tasks, MAML directly optimises for adaptability through a gradient-based formulation:</p>
+$$
+	\min_{\theta} \mathbb{E}_{\mathcal{T} \sim p(\mathcal{T})} [\mathcal{L}_{\mathcal{T}}(\theta - \alpha \nabla_{\theta} \mathcal{L}_{\mathcal{T}}(\theta))].
+$$<!-- The mathematical structure of MAML provides two key advantages for sim-to-real transfer: 
+
+- The nested optimisation directly shapes the loss landscape around $\theta$ to ensure that a single gradient step produces effective adaptation. This means the learned parameters encode both task-agnostic knowledge and the capacity for rapid specialisation.
+- MAML optimises the post-adaptation performance $\mathcal{L}\_{\mathcal{T}}(\theta - \alpha \nabla\_{\theta} \mathcal{L}\_{\mathcal{T}}(\theta))$ rather than the pre-adaptation performance $\mathcal{L}_{\mathcal{T}}(\theta)$, so it explicitly accounts for how well the policy can adapt to distribution shifts, exactly what occurs during sim-to-real transfer. -->
+<p>For <a href="https://arxiv.org/pdf/2003.01239">robotic applications</a>, MAML&rsquo;s gradient-based adaptation mechanism integrates naturally with deep learning architectures and standard reinforcement learning objectives. While model-based approaches must learn accurate dynamics models, which can be challenging for complex robotic systems, and metric-based approaches require carefully designed embedding spaces, MAML works directly in parameter space. This allows it to capture sophisticated adaptation strategies without additional architectural constraints.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/The-Reality-Gap/RapidMAML.gif"
+             style="display: block; margin: 0 auto; "
+             alt="RapidMAML"
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 6: <a href="https://arxiv.org/pdf/2003.01239">ES-MAML</a> uses <a href="https://lilianweng.github.io/posts/2019-09-05-evolution-strategies/">Evolutionary Strategies</a> (ES) to learn an adaptive control policy for a noisy task.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p>Also, the computation of MAML&rsquo;s adaptation gradients $\nabla_{\theta}\mathcal{L}_{\mathcal{T}}(\theta)$ can leverage standard automatic differentiation tools, making it easy to implement despite its mathematical sophistication. Often a <a href="https://interactive-maml.github.io/first-order.html">first-order approximation (FOMAML)</a> is used to improve computational efficiency by ignoring second-order terms in the meta-gradient computation, while still maintaining much of the method&rsquo;s adaptation capabilities.</p>
+<p>While MAML provides efficient adaptation through gradient-based updates, it doesn&rsquo;t explicitly model uncertainty in the task parameters, a critical consideration for sim-to-real transfer, where real-world dynamics are initially unknown. <a href="https://arxiv.org/pdf/1806.02817">Probabilistic meta-learning</a><sup id="fnref:12"><a href="#fn:12" class="footnote-ref" role="doc-noteref">12</a></sup> approaches address this limitation by modelling a distribution over possible task parameters:</p>
+$$
+	p(\mathcal{T}|\mathcal{D}) = \int p(\mathcal{T}|\theta) p(\theta|\mathcal{D}) d \theta .
+$$<p>This allows the robot to maintain and update beliefs about real-world dynamics as it collects data. <a href="https://arxiv.org/pdf/1903.08254">Probabilistic Embeddings for Actor-Critic RL</a><sup id="fnref:13"><a href="#fn:13" class="footnote-ref" role="doc-noteref">13</a></sup> (PEARL) builds on this insight by combining meta-learning with probabilistic inference. Instead of MAML&rsquo;s direct parameter adaptation, PEARL learns a latent space of task variables that capture task uncertainty:</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/The-Reality-Gap/PEARL.png"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 7: PEARL&rsquo;s meta-training procedure."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 7: PEARL&rsquo;s meta-training procedure.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+$$
+	\pi_{\theta}(a|s, z) \ \  \text{where} \ \ z \sim q_{\phi}(z|\mathcal{D}_{\mathcal{T}}).
+$$<p>Here, the policy $\pi_{\theta}$​ conditions its actions not just on the current state $s$, but also on a latent task variable $z$ inferred from task-specific data $\mathcal{D}_{\mathcal{T}}$​. This structure provides several advantages for sim-to-real transfer:</p>
+<ul>
+<li>The learned latent space can capture structured uncertainty about task parameters, allowing for more efficient exploration than MAML&rsquo;s gradient-based adaptation.</li>
+<li>By learning a probabilistic encoder $q_{\phi}$​, usually via a <a href="https://arxiv.org/pdf/1312.6114">Variational Auto-Encoder</a><sup id="fnref:14"><a href="#fn:14" class="footnote-ref" role="doc-noteref">14</a></sup> (VAE), PEARL can rapidly infer task-relevant parameters from small amounts of real-world data without requiring gradient updates to the policy parameters. This uncertainty-aware approach enables robots to systematically explore and adapt to real-world conditions while maintaining uncertainty estimates about task dynamics.</li>
+</ul>
+<h3 id="modular-policy-architectures">Modular Policy Architectures</h3>
+<p>Rather than treating sim-to-real transfer as a monolithic problem, modular architectures break policies into components that can be transferred or adapted independently. This decomposition allows us to leverage the fact that some aspects of a task may transfer more readily than others. End-to-end systems are also notoriously hard to debug and breaking the problem down into smaller sub-problems can help to identify exactly what part of the system is misbehaving. Robotic tasks often naturally decompose into three main components:</p>
+<ul>
+<li><strong>Perception</strong>, understanding the environment through sensors.</li>
+<li><strong>Planning</strong>, deciding what actions to take.</li>
+<li><strong>Control</strong>, precisely executing these actions.</li>
+</ul>
+<p>Perception modules face domain gaps between clean simulation data and noisy reality. For example, when detecting objects with RGB cameras, simulated images often lack real-world artefacts like motion blur, lens distortion, and varying exposure levels. Some techniques to address this could include:</p>
+<ul>
+<li>Using <a href="https://paperswithcode.com/dataset/virtual-kitti">synthetic data augmentation</a> with <a href="https://renderwonk.com/publications/s2010-shading-course/">Physically-Based Rendering (PBR)</a> to match real camera characteristics.</li>
+<li>Implementing <a href="https://openaccess.thecvf.com/content_CVPR_2020/papers/Rao_RL-CycleGAN_Reinforcement_Learning_Aware_Simulation-to-Real_CVPR_2020_paper.pdf">CycleGAN-based domain adaptation</a><sup id="fnref:15"><a href="#fn:15" class="footnote-ref" role="doc-noteref">15</a></sup> to align synthetic and real image distributions.</li>
+<li>Applying targeted domain randomisation to critical visual features like lighting and camera parameters.</li>
+</ul>
+<p>Planning modules need to handle state uncertainty when moving from simulation to reality. Some methods to solve this include:</p>
+<ul>
+<li>Using <a href="https://rll.berkeley.edu/beliefopt/">belief space planning</a><sup id="fnref:16"><a href="#fn:16" class="footnote-ref" role="doc-noteref">16</a></sup> that explicitly considers state uncertainty distributions.</li>
+<li>Implementing <a href="https://arxiv.org/pdf/1604.06057">hierarchical</a><sup id="fnref:17"><a href="#fn:17" class="footnote-ref" role="doc-noteref">17</a></sup> planning with closed-loop feedback at multiple timescales.</li>
+<li>Incorporating <a href="https://arxiv.org/pdf/1901.02577">learned error models</a><sup id="fnref:18"><a href="#fn:18" class="footnote-ref" role="doc-noteref">18</a></sup> that predict the magnitude and distribution of real-world deviations from planned trajectories.</li>
+</ul>
+<p>Control modules must bridge the reality gap in physical interactions. Some methods to solve this include:</p>
+<ul>
+<li><a href="https://arxiv.org/pdf/1810.10093">Structured Domain Randomisation</a><sup id="fnref:19"><a href="#fn:19" class="footnote-ref" role="doc-noteref">19</a></sup> (SDR), systematically varying physical parameters based on the specific hardware used. This method can also be used for perception problems.</li>
+<li><a href="https://web.archive.org/web/20210515232320id_/https://www.annualreviews.org/doi/pdf/10.1146/annurev-control-090419-075625">Learning-Based Model Predictive Control</a><sup id="fnref:20"><a href="#fn:20" class="footnote-ref" role="doc-noteref">20</a></sup> (LBMPC), combining traditional MPC with learned vehicle dynamics.</li>
+<li>Meta-Learning for <a href="https://arxiv.org/pdf/1803.11347">Rapid Control Adaptation</a><sup id="fnref:21"><a href="#fn:21" class="footnote-ref" role="doc-noteref">21</a></sup>.</li>
+</ul>
+<p>These modular approaches work best when combined with other transfer strategies, like using meta-learning to adapt specific modules or applying domain adaptation selectively. This flexibility in mixing approaches makes modularity a particularly effective tool for bridging the reality gap and can better scale when building robotic systems with a larger team or group where departments need to focus on separate components and end-to-end learning would be infeasible.</p>
+<h2 id="online-adaption-and-deployment">Online Adaption and Deployment</h2>
+<p>While training in simulation and transfer learning provide essential components for robotic learning, the reality of real-world deployment often presents challenges that cannot be fully anticipated. Environmental variations, hardware differences between robots, and changing task requirements all necessitate real-world adaptation. Online adaptation enables robots to continuously refine their policies during actual deployment, adjusting to real-world conditions that may drift over time or differ from training assumptions.</p>
+<p>The key challenge in online adaptation is balancing the need for exploration and improvement against maintaining reliable performance and safety. Unlike simulation, where exploration carries no physical risk, real-world adaptation must be conducted carefully to avoid expensive or dangerous failures. This creates a complex trade-off: adapt too conservatively and the robot may never achieve optimal performance, adapt too aggressively and it risks unsafe behaviour.</p>
+<p>Modern approaches to online adaptation address this challenge through several complementary strategies. Few-shot adaptation enables rapid policy updates using minimal real-world data. Lifelong learning methods allow robots to accumulate experience while preventing degradation of existing capabilities. Progressive transfer techniques provide structured frameworks for safely transitioning from simulation to real-world operation. Importantly, these approaches must also consider practical deployment constraints like computational resources, hardware variations between robots, and the potential for knowledge sharing across robotic fleets.</p>
+<h3 id="few-shot-adaption">Few-Shot Adaption</h3>
+<p>Online adaptation in robotics often requires making policy adjustments with small quantities of real-world data. Few-shot adaptation techniques address this challenge by enabling rapid policy updates using just a handful of real-world interactions, making them particularly valuable when collecting extensive real-world data is expensive or dangerous. While meta-learning approaches train policies to be inherently adaptable before deployment, <a href="https://www.arxiv.org/pdf/2409.13228">few-shot adaptation</a><sup id="fnref:22"><a href="#fn:22" class="footnote-ref" role="doc-noteref">22</a></sup> focuses on efficient policy refinement during actual deployment.</p>
+<p>One strategy, used by <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9780237">SafeAPT</a><sup id="fnref:23"><a href="#fn:23" class="footnote-ref" role="doc-noteref">23</a></sup>, is to maintain an ensemble of policies trained in simulation, then adapt their combination based on real-world performance:</p>
+$$
+\pi_{\text{adapted}}(a|s) = \sum_{i=1}^{N} w_{i}(s) \pi_{i}(a|s)
+$$<p>where $w_{i}(s)$ is the context-dependent weights updated online using real-world data. This approach allows robots to leverage diverse behaviours, learned in simulation while quickly adapting their mixture to specific operating conditions. The weights can be rapidly updated using techniques like <a href="https://allendowney.github.io/ThinkBayes2/chap13.html">Bayesian inference</a> or online optimisation, requiring only a few real-world samples.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/The-Reality-Gap/SafeAPT.png"
+             style="display: block; margin: 0 auto; height: 300px;"
+             alt="Figure 8: SafeAPT generates a diverse repertoire of safe policies in simulation, then selects and refines the most suitable policy for real-world goals using a learned safety model."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 8: SafeAPT generates a diverse repertoire of safe policies in simulation, then selects and refines the most suitable policy for real-world goals using a learned safety model.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<!-- Context awareness plays a crucial role in few-shot adaptation. By identifying different operational contexts, like variations in surfaces, lighting conditions and task requirements, robots can make targeted adaptations. This can be summarised as the following loss function:
+
+$$
+\mathcal{L}_{\text{adapt}}(\theta, c) = \mathbb{E}_{(s, a) \sim \mathcal{D}_{\text{real}}} [\mathcal{U}(s, a, c) || \pi_{\theta}(a|s, c) - \pi_{\text{base}}(a|s)]
+$$
+
+where $c$ represents the context and $\mathcal{U}(s, a, c)$ captures uncertainty in the current policy's predictions for that context. This focused adaptation allows robots to maintain separate adaptations for different scenarios while sharing common underlying behaviours. -->
+<p>For <a href="https://proceedings.mlr.press/v100/dasari20a/dasari20a.pdf">multi-robot systems</a>, <a href="https://arxiv.org/pdf/2103.03697">few-shot adaptation</a><sup id="fnref:24"><a href="#fn:24" class="footnote-ref" role="doc-noteref">24</a></sup> can be enhanced through shared learning. When one robot successfully adapts to a new situation, its new experience can be validated and shared across the fleet:</p>
+$$
+    \mathcal{D}_{\text{shared}} = \{ (s, a, r, c)_{i} : V(s, a, c) > \tau \}
+$$<p>where $V(s,a,c)$ is a validation function that evaluates the safety and performance of state-action pairs under context $c$, and $\tau$ is a safety threshold. This allows the fleet to collectively adapt to new situations while maintaining <a href="https://arxiv.org/pdf/2309.10657">safety guarantees</a><sup id="fnref:25"><a href="#fn:25" class="footnote-ref" role="doc-noteref">25</a></sup>.</p>
+<p>Hardware variations between robots present an additional challenge for few-shot adaptation. One approach is to learn hardware-specific adaptation layers while maintaining a shared base policy:</p>
+$$
+    \pi_{\text{robot}}(a|s) = h_{\phi}(\pi_{\text{base}}(s), \xi)
+$$<p>where $h_{\phi}$​ is a hardware-specific adaptation layer and $\xi$ represents hardware parameters such as actuator limits, sensor characteristics, and physical dimensions. This architecture allows each robot to quickly adapt to its specific <a href="https://dl.acm.org/doi/pdf/10.5555/3327546.3327606">hardware characteristics</a><sup id="fnref:26"><a href="#fn:26" class="footnote-ref" role="doc-noteref">26</a></sup> while leveraging shared knowledge.</p>
+<p>Any shared learning framework requires robust <a href="https://arxiv.org/pdf/2311.13714">validation</a><sup id="fnref:27"><a href="#fn:27" class="footnote-ref" role="doc-noteref">27</a></sup> mechanisms, During few-shot learning, runtime monitoring systems can be used to continuously evaluate adapted behaviors against key performance indicators and safety constraints:</p>
+$$
+    \text{safe}(s, a) = \forall i \in \{ 1, \ldots , M \} : C_{i}(s, a) \leq 0
+$$<p>where $C_{i}$​ represent safety constraints. When a robot discovers a promising adaptation, the validation function $V(s,a,c)$ determines whether this experience merits inclusion in the shared dataset $\mathcal{D}_{\text{shared​}}$. If constraint violations occur during deployment, the system can revert to a known safe policy while collecting data for more robust adaptation. This closed-loop validation approach ensures that the collective learning process remains safe and reliable even as the robot fleet explores new adaptation strategies.</p>
+<p>Real-world examples of fleet learning systems with these validation mechanisms remain scarce in public literature, as they&rsquo;re typically proprietary technologies developed by companies like <a href="https://archive.ph/2024.04.06-140525/https://www.sfchronicle.com/sf/article/waymo-service-driverless-robotaxi-19386537.php">Waymo</a>, <a href="https://bostondynamics.com/webinars/scaling-data-driven-asset-reliability-with-robot-fleets/">Boston Dynamics</a>, and <a href="https://www.aboutamazon.com/news/operations/amazon-introduces-new-robotics-solutions">Amazon Robotics</a>. There is an increasing amount of open-source research for fleet adaptation systems, but these are often limited to <a href="https://arxiv.org/pdf/2405.07515">small-scale experiments</a><sup id="fnref:28"><a href="#fn:28" class="footnote-ref" role="doc-noteref">28</a></sup>.</p>
+<h3 id="lifelong-learning">Lifelong Learning</h3>
+<p>While few-shot adaptation handles immediate adjustments, lifelong learning focuses on continuous improvement during extended deployment. This presents a fundamental challenge:</p>
+<blockquote>
+<p>How can robots accumulate new knowledge over months or years of operation without forgetting their existing capabilities?</p></blockquote>
+<p>A key challenge of this trade-off is <a href="http://www.bcp.psych.ualberta.ca/~mike/Pearl_Street/PSYCO354/pdfstuff/Readings/French2.pdf">catastrophic forgetting</a><sup id="fnref:29"><a href="#fn:29" class="footnote-ref" role="doc-noteref">29</a></sup> in neural networks. This is particularly crucial in robotics, where maintaining baseline performance while learning is essential for practical deployment. It is also quite pronounced in task-agnostic settings where task boundaries are unclear, and the robot must continuously learn without explicit transitions between distinct learning phases.</p>
+<p>Regularisation based methods offer one approach to mitigate catastrophic forgetting. Techniques like <a href="https://arxiv.org/pdf/1612.00796">Elastic Weight Consolidation</a><sup id="fnref:30"><a href="#fn:30" class="footnote-ref" role="doc-noteref">30</a></sup> (EWC) identify and protect important parameters for previously learned tasks by adding constraint terms to the loss function:</p>
+$$
+    \mathcal{L}_{\text{EWC}}(\theta) = \mathcal{L}_{\text{current}}(\theta) + \sum_{i} \frac{\lambda}{2} F_{i}(\theta - \theta_{\text{A, i}}^{*})^{2}
+$$<p>where $\mathcal{L}_{\text{current}}(\theta)$ represents the loss for the current task, $\lambda$ describes how important the old task is compared to the new one, and $F_{i}$ is the Fisher information representing parameter importance for task $i$ where $\theta_{A, i}$ is the optimal parameters for the previous tasks.</p>
+<p>Replay based methods can also be used, such as <a href="https://arxiv.org/pdf/1511.05952">Prioritized Experience Replay</a><sup id="fnref:31"><a href="#fn:31" class="footnote-ref" role="doc-noteref">31</a></sup> (PER), that maintains a buffer of past-experiences $\mathcal{B}$ with a priority weight $\alpha(s, a)$. $\delta(s, a)$ is the temporal difference error that quantifies how much the current policy&rsquo;s predictions deviate from observed rewards and state transitions. The sampling probability is given by:</p>
+$$
+    P(i) = \frac{p_i^{\alpha}}{\sum_k p_k^{\alpha}}
+$$<p>where $\alpha$ determines how much prioritization is used. To correct for sampling bias, importance sampling weights $w_i = (N \cdot P(i))^{-\beta}$ are applied to the loss gradients.</p>
+<!-- The loss function for this is then given as:
+
+$$
+    \mathcal{L}_{\text{lifelong}}(\theta) = \mathbb{E}_{(s, a) \sim \mathcal{B}} [\alpha(s, a) \delta(s, a)] .
+$$ -->
+<p>The learned architecture can also be adjusted to inherently resist forgetting. For example, <a href="https://arxiv.org/pdf/1606.04671">Progressive Neural Networks</a><sup id="fnref:32"><a href="#fn:32" class="footnote-ref" role="doc-noteref">32</a></sup> (PNN) expand the architecture for each new task while preserving previous learned knowledge. <a href="https://arxiv.org/pdf/1711.05769">PackNet</a><sup id="fnref:33"><a href="#fn:33" class="footnote-ref" role="doc-noteref">33</a></sup> partitions network parameters across tasks to prevent interference.</p>
+<p>For all of these strategies the fundamental challenge remains balancing plasticity (the ability to learn new tasks) with stability (retaining performance on previous tasks). Systems that lean too far toward stability resist new learning, while those prioritizing plasticity risk catastrophic forgetting. Modern approaches often use a blend of these approaches, for example <a href="https://arxiv.org/pdf/2407.07668">predictive uncertainty estimates</a><sup id="fnref:34"><a href="#fn:34" class="footnote-ref" role="doc-noteref">34</a></sup> can be used to decide how samples should be included in the model whilst learning online.</p>
+<p>Complementary to addressing forgetting, efficient memory management focuses on what to store and how to store it when long-term storage of all experiences is infeasible. Real robots cannot store petabytes of raw-experience data, and blindly replaying all past-experiences is both inefficient and potentially introduces sampling bias toward common scenarios.</p>
+<p>Lifelong learning is a complex and rapidly evolving field that deserves more detail than I can provide in this section. As companies scale robotic deployments across more locations with increasingly sophisticated behaviors, I expect we&rsquo;ll discover much more about the specific engineering challenges involved.</p>
+<!-- - Episdoic memory
+- Coreset selection
+- Knowledge distillation -->
+<!-- Efficient storage and updating of adaptation data is crucial for long-term deployment. One effective approach uses a hierarchical memory structure:
+
+$$
+    \mathcal{M} = \{\mathcal{M}{\text{short}}, \mathcal{M}{\text{long}}, \mathcal{M}_{\text{shared}}\}
+$$
+
+where experiences are strategically stored and consolidated based on their importance and generalisablilty. This is combined with compression techniques to manage memory constraints:
+
+$$
+\text{store}(e) =
+    \begin{cases}
+        \mathcal{M}_{\text{short}} & \text{if } \text{novel}(e) > \tau_1 \\
+        \mathcal{M}{\text{long}} & \text{if } \text{important}(e) > \tau_2 \\
+        \mathcal{M}_{\text{shared}} & \text{if } \text{transferable}(e) > \tau_3
+    \end{cases}
+$$
+
+To validate long-term learning stability, robots often employ continuous monitoring systems that track performance across different timescales:
+
+$$
+    \text{stable}(t) = \bigwedge_{i=1}^{K} \left|\frac{P_i(t) - P_i(t-\Delta_i)}{P_i(t-\Delta_i)}\right| \leq \epsilon_i
+$$
+
+where $P_{i}$​ are performance metrics evaluated over different time windows $\Delta_{i}$​. This helps identify and correct any degradation in capabilities over time.
+
+The combination of distributed learning, health-aware adaptation, efficient memory management, and stability monitoring enables robots to continuously improve while maintaining reliable performance during long-term deployment. These mechanisms ensure that robots can accumulate experience safely while adapting to changing conditions and hardware characteristics. -->
+<h3 id="progressive-transfer">Progressive Transfer</h3>
+<p>Progressive transfer provides a structured approach for transitioning policies from simulation to real-world operation. Rather than attempting an immediate switch, robots gradually reduce their reliance on simulation while building confidence in real-world performance. This approach is particularly important for safety-critical applications and fleet-wide deployments.</p>
+<p>The core idea usually blends simulation and real-world policies based on deployment confidence:</p>
+$$
+    a_{\text{final}}(s,c) = (1-\beta(s,c))a_{\text{real}}(s) + \beta(s,c)a_{\text{sim}}(s)
+$$<p>where $\beta(s, c) \in [ 0, 1 ]$ represents confidence in the real-world policy for state $s$ and context $c$. As deployment experience increases and safety metrics improve, $\beta$ decreases, shifting control from simulation-based to real-world policies. Context $c$ captures task complexity, environmental conditions, and safety requirements.</p>
+<!-- $$
+\text{Stage}(r,t) = 
+    \begin{cases}
+        \text{Supervised} & \text{if} C(r,t) < \tau_{1} \\
+        \text{Assisted} & \text{if} \tau_1 \leq C(r,t) < \tau_{2} \\
+        \text{Autonomous} & \text{if} C(r,t) \geq \tau_{2}
+    \end{cases}
+$$
+
+where $C(r, t)$ measures the confidence in robot $r$ performing task $t$. This enables systematic rollout across robot fleets while maintaining safety guarantees.
+
+Computational constraints during deployment are often managed through progressive model distillation:
+
+$$
+    \pi_{\text{deployed}}(a|s) = D(\pi_{\text{full}}(s), \kappa)
+$$
+
+where $D$ represents a distillation process and $\kappa$ defines computational budget constraints. The distilled policy is progressively refined based on deployment performance:
+
+$$
+    \mathcal{L}_{\text{distill}}(\theta) = (1-\alpha)\mathcal{L}_{\text{sim}}(\theta) + \alpha\mathcal{L}_{\text{real}}(\theta)
+$$
+
+where $\alpha$ increases as more real-world data becomes available.
+
+Monitoring and verification during transfer can be implemented through a hierarchical safety framework:
+
+$$
+    \text{safe}(s,a) = \bigwedge_{i=1}^{M} \left(C_i^{\text{sim}}(s,a) \land C_i^{\text{real}}(s,a)\right) \leq 0
+$$
+
+where constraints are evaluated in both simulated and real environments. This dual verification helps identify potential safety violations before they occur in deployment.
+
+Integration with distributed learning systems allows successful transfers to be shared across the fleet:
+
+$$
+    \mathcal{K}_{\text{fleet}} = \{(c, \beta_c, \pi_c) : V(c, \pi_c) > \eta\}
+$$
+
+where $\mathcal{K}_{\text{fleet}}$​ represents a knowledge base of validated transfers that can be used to accelerate deployment on other robots.
+
+This systematic approach to progressive transfer, combining confidence-based interpolation, staged deployment, computational optimisation, and distributed validation, enables safe and efficient transition from simulation to real-world operation across robot fleets. -->
+<h2 id="references">References</h2>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>K W Liff, <em>Parameter Estimation for Flight Vehicles</em>, Journal of Guidance, Control and Dynamics, 1989.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>N Sontakke, H Chae, S Lee, T Huang, D W. Hong, S Ha, <em>Residual Physics Learning and System Identification for Sim-to-real Transfer of Policies on Buoyancy Assisted Legged Robots</em>, arXiv:2303.09597, 2023.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>H Jemin, L Joonho, H Marco, <em>Per-Contact Iteration Method for Solving Contact Dynamics</em>, IEEE Robotics and Automation Letters, 2018.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>H.J. Terry Suh, Max Simchowitz, Kaiqing Zhang, Russ Tedrake, <em>Do Differentiable Simulators Give Better Policy Gradients?</em>, Proceedings of the 39th International Conference on Machine Learning, PMLR 162, 2022.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p>A. Romero, E. Aljalbout, Y. Song, D. Scaramuzza, <em>Actor-Critic Model Predictive Control: Differentiable Optimization Meets Reinforcement Learning</em>, arXiv:2306.09852, 2024.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:6">
+<p>A. Oshin, H. Almubarak, E.A. Theodorou, <em>Differentiable Robust Model Predictive Control</em>, Robotics: Science and Systems, Delft, Netherlands, 2024.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:7">
+<p>J. Tobin, R. Fong, A. Ray, J. Schneider, W. Zaremba, P. Abbeel, <em>Domain Randomization for Transferring Deep Neural Networks from Simulation to the Real World</em>, arXiv:1703.06907, 2017.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:8">
+<p>Y. Ganin, V. Lempitsky, <em>Unsupervised Domain Adaptation by Backpropagation</em>, Proceedings of the 32nd International Conference on Machine Learning (ICML), 2015.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:9">
+<p>I.J. Goodfellow, J. Pouget-Abadie, M. Mirza, B. Xu, D. Warde-Farley, S. Ozair, A. Courville, Y. Bengio, <em>Generative Adversarial Nets</em>, Proceedings of the 27th International Conference on Neural Information Processing Systems (NIPS), 2014.&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:10">
+<p>S. James, P. Wohlhart, M. Kalakrishnan, D. Kalashnikov, A. Irpan, J. Ibarz, S. Levine, R. Hadsell, K. Bousmalis, <em>Sim-to-Real via Sim-to-Sim: Data-efficient Robotic Grasping via Randomized-to-Canonical Adaptation Networks</em>, Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2019.&#160;<a href="#fnref:10" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:11">
+<p>C. Finn, P. Abbeel, and S. Levine, “Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks,” <em>Proceedings of the 34th International Conference on Machine Learning</em>, 2017.&#160;<a href="#fnref:11" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:12">
+<p>C. Finn, K. Xu, and S. Levine, “Probabilistic Model-Agnostic Meta-Learning,” <em>Proceedings of the 31st Conference on Neural Information Processing Systems</em> (NeurIPS 2017), 2017.&#160;<a href="#fnref:12" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:13">
+<p>K. Rakelly, A. Zhou, D. Quillen, C. Finn, and S. Levine, “Efficient Off-Policy Meta-Reinforcement Learning via Probabilistic Context Variables,” <em>Proceedings of the 36th International Conference on Machine Learning</em> (ICML), 2019.&#160;<a href="#fnref:13" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:14">
+<p>D. P. Kingma and M. Welling, “Auto-Encoding Variational Bayes,” <em>Proceedings of the 2nd International Conference on Learning Representations</em> (ICLR) 2014.&#160;<a href="#fnref:14" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:15">
+<p>K. Rao, C. Harris, A. Irpan, S. Levine, J. Ibarz, and M. Khansari, “RL-CycleGAN: Reinforcement Learning Aware Simulation-To-Real,” <em>Conference on Computer Vision and Pattern Recognition</em> (CVPR), 2020.&#160;<a href="#fnref:15" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:16">
+<p>S. Patil, G. Kahn, P. Abbeel, and 3 other authors, “Scaling up Gaussian Belief Space Planning Through Covariance-Free Trajectory Optimization and Automatic Differentiation,” <em>Workshop on the Algorithmic Foundations of Robotics</em> (WAFR 2014), 2014.&#160;<a href="#fnref:16" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:17">
+<p>T. D. Kulkarni, K. R. Narasimhan, A. Saeedi, and J. B. Tenenbaum, “Hierarchical Deep Reinforcement Learning: Integrating Temporal Abstraction and Intrinsic Motivation,” <em>Proceedings of the 30th Conference on Neural Information Processing Systems</em> (NeurIPS), Dec. 2016.&#160;<a href="#fnref:17" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:18">
+<p>A. Sharma, J. Harrison, M. Tsao, and M. Pavone, “Robust and Adaptive Planning under Model Uncertainty,” <em>Proceedings of the Twenty-Ninth International Conference on Automated Planning and Scheduling (ICAPS 2019)</em>, 2019.&#160;<a href="#fnref:18" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:19">
+<p>A. Prakash, S. Boochoon, M. Brophy, D. Acuna, E. Cameracci, G. State, O. Shapira, and S. Birchfield, “Structured Domain Randomization: Bridging the Reality Gap by Context-Aware Synthetic Data,” <em>Proceedings of the 2019 International Conference on Robotics and Automation (ICRA)</em>, 2019.&#160;<a href="#fnref:19" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:20">
+<p>L. Hewing, K. P. Wabersich, M. Menner, and M. N. Zeilinger, “Learning-Based Model Predictive Control: Toward Safe Learning in Control,” <em>Annual Review of Control, Robotics, and Autonomous Systems</em>, 2019.&#160;<a href="#fnref:20" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:21">
+<p>A. Nagabandi, I. Clavera, S. Liu, R. S. Fearing, P. Abbeel, S. Levine, and C. Finn, “Learning to Adapt in Dynamic, Real-World Environments Through Meta-Reinforcement Learning,” <em>Proceedings of the 7th International Conference on Learning Representations (ICLR 2019)</em>, 2019.&#160;<a href="#fnref:21" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:22">
+<p>F. Baumeister, L. Mack, and J. Stueckler, “Incremental Few-Shot Adaptation for Non-Prehensile Object Manipulation using Parallelizable Physics Simulators,” <em>arXiv preprint arXiv:2409.13228</em>, 2024.&#160;<a href="#fnref:22" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:23">
+<p>R. Kaushik, K. Arndt, and V. Kyrki, “SafeAPT: Safe simulation-to-real robot learning using diverse policies learned in simulation,” <em>IEEE Robotics and Automation Letters</em>, 2022.&#160;<a href="#fnref:23" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:24">
+<p>A. Ghadirzadeh, X. Chen, P. Poklukar, C. Finn, M Bjorkman, D Kragic, &ldquo;Bayesian Meta-Learning for Few-Shot Policy Adaptation across Robotic Platforms&rdquo;, arXiv:2103.03697, 2021.&#160;<a href="#fnref:24" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:25">
+<p>L. Berducci, S. Yang, R. Mangharam, R. Grosu, &ldquo;Learning Adaptive Safety for Multi-Agent Systems&rdquo;, arXiv:2309.10657v2, 2023.&#160;<a href="#fnref:25" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:26">
+<p>T. Chen, A. Murali, A. Gupta, &ldquo;Hardware Conditioned Policies for Multi-Robot Transfer Learning&rdquo;, <em>Proceedings of the 32nd Conference on Neural Information Processing Systems (NeurIPS), Montreal, Canada</em>, 2018.&#160;<a href="#fnref:26" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:27">
+<p>K. Garg, S. Zhang, O. So, C. Dawson, Chuchu Fan, &ldquo;Learning Safe Control for Multi-Robot Systems: Methods, Verification and Open Challenges&rdquo;, <em>arXiv:2311.13714v1</em>, 2023.&#160;<a href="#fnref:27" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:28">
+<p>M. Muller, S. Brahmbhatt, A. Deka, Q Leboutet, D. Hafner, V. Koltun, &ldquo;OpenBot-Fleet: A System for Collective Learning with Real Robots&rdquo;, <em>arXiv:2405.07515v1</em>, 2024.&#160;<a href="#fnref:28" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:29">
+<p>R. French, &ldquo;Catastrophic Forgetting in Connectionist Networks&rdquo;, <em>Trends in Cognitive Sciences</em>, 1999.&#160;<a href="#fnref:29" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:30">
+<p>J. Kirkpatrick, R. Pascanu, Neil C. Rabinowitz, J. Veness, G. Desjardins, A. Rusu, K. Milan, J. Quan, T. Ramalho, A. Grabska-Barwinska, D. Hassabis, C. Clopath, D. Kumaran, R, Hadsell, &ldquo;Overcoming catastrophic forgetting in neural networks&rdquo;, <em>arXiv:1612.00796v2</em>, 2017.&#160;<a href="#fnref:30" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:31">
+<p>T. Schaul, J. Quan, I. Antonoglou, D. Silver, &ldquo;Prioritized Experience Replay&rdquo;, <em>International Conference on Learned Representations (ICLR)</em>, 2016.&#160;<a href="#fnref:31" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:32">
+<p>A. Rusu, N. C. Rabinowitz, G. Desjardins, H. Soyer, J. Kirkpatrick, K. Kavukcuoglu, R. Pascanu, R. Hadsell, &ldquo;Progressive Neural Networks&rdquo;, <em>arXiv:1606.04671</em>, 2016.&#160;<a href="#fnref:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:33">
+<p>A. Mallya, S. Lazebnik, &ldquo;PackNet: Adding Multiple Tasks to a Single Network by Iterative Pruning&rdquo;, <em>arXiv:1711.05769</em>, 2017.&#160;<a href="#fnref:33" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:34">
+<p>G. Serra, B. Werner, F. Buettner, &ldquo;How to Leverage Predictive Uncertainty Estimates for
+Reducing Catastrophic Forgetting in Online Continual Learning&rdquo;, <em>Proceedings of 3rd Workshop on Uncertainty
+Reasoning and Quantification in Decision Making</em>, UDM-KDD, 2024.&#160;<a href="#fnref:34" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+]]></content:encoded>
+    </item>
     <item>
       <title>Robotic Learning Part 2: Key Learning Paradigms in Robotics</title>
       <link>http://localhost:1313/deltaq/posts/key-learning-paradigms-in-robotics/</link>
@@ -26,16 +627,16 @@
 &lt;li&gt;&lt;strong&gt;Reinforcement Learning&lt;/strong&gt;: Letting robots discover solutions through experience&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Supervised Learning&lt;/strong&gt;: Using labeled data to build core perception and planning capabilities&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Each of these approaches tackles the fundamental challenges of robotic learning in different ways, and modern systems often combine them to leverage their complementary strengths. As part of this post I have also written some &lt;a href=&#34;https://github.com/AOS55/RLFoundations&#34;&gt;open-source scripts&lt;/a&gt; for a robotic arm to solve a &lt;a href=&#34;https://robotics.farama.org/envs/fetch/pick_and_place/&#34;&gt;pick and place&lt;/a&gt; task, similar to our coffee cup examples, using each of the methods discussed. Due to the natural challenges and computational expense of &lt;a href=&#34;https://www.natolambert.com/writing/debugging-mbrl&#34;&gt;robotic&lt;/a&gt; &lt;a href=&#34;https://andyljones.com/posts/rl-debugging.html&#34;&gt;learning&lt;/a&gt; this programme also includes pre-trained models that can be downloaded from Hugging Faces. Please feel free to modify and use them as you see fit they principally show how to use the IL and model-free RL methods discussed in this post on the simulated robot.&lt;/p&gt;</description>
+&lt;p&gt;Each of these approaches tackles the fundamental challenges of robotic learning in different ways, and modern systems often combine them to leverage their complementary strengths. As part of this post, I have included open-source scripts for a robotic arm that solves a &lt;a href=&#34;https://robotics.farama.org/envs/fetch/pick_and_place/&#34;&gt;pick-and-place&lt;/a&gt; task (similar to our coffee cup examples) using each of the methods discussed.  These scripts are available on GitHub at &lt;a href=&#34;https://github.com/AOS55/RLFoundations&#34;&gt;RLFoundations&lt;/a&gt;. Due to the natural challenges and computational expense of &lt;a href=&#34;https://www.natolambert.com/writing/debugging-mbrl&#34;&gt;robotic&lt;/a&gt; &lt;a href=&#34;https://andyljones.com/posts/rl-debugging.html&#34;&gt;learning&lt;/a&gt;, this repository also includes pre-trained models that can be downloaded from &lt;a href=&#34;https://huggingface.co/collections/AOS55/rlfoundations-67b325988a1b0f0b48d5cb68&#34;&gt;Hugging Face&lt;/a&gt;. Please feel free to modify and use them as you see fit, they primarily demonstrate how to implement the IL and model-free RL methods discussed in this post on the simulated robot.&lt;/p&gt;</description>
       <content:encoded><![CDATA[<p>In this post, we&rsquo;ll explore the fundamental methods used to teach robots new skills. The three main paradigms we&rsquo;ll explore are:</p>
 <ul>
 <li><strong>Imitation Learning</strong>: Teaching robots by showing them what to do</li>
 <li><strong>Reinforcement Learning</strong>: Letting robots discover solutions through experience</li>
 <li><strong>Supervised Learning</strong>: Using labeled data to build core perception and planning capabilities</li>
 </ul>
-<p>Each of these approaches tackles the fundamental challenges of robotic learning in different ways, and modern systems often combine them to leverage their complementary strengths. As part of this post I have also written some <a href="https://github.com/AOS55/RLFoundations">open-source scripts</a> for a robotic arm to solve a <a href="https://robotics.farama.org/envs/fetch/pick_and_place/">pick and place</a> task, similar to our coffee cup examples, using each of the methods discussed. Due to the natural challenges and computational expense of <a href="https://www.natolambert.com/writing/debugging-mbrl">robotic</a> <a href="https://andyljones.com/posts/rl-debugging.html">learning</a> this programme also includes pre-trained models that can be downloaded from Hugging Faces. Please feel free to modify and use them as you see fit they principally show how to use the IL and model-free RL methods discussed in this post on the simulated robot.</p>
+<p>Each of these approaches tackles the fundamental challenges of robotic learning in different ways, and modern systems often combine them to leverage their complementary strengths. As part of this post, I have included open-source scripts for a robotic arm that solves a <a href="https://robotics.farama.org/envs/fetch/pick_and_place/">pick-and-place</a> task (similar to our coffee cup examples) using each of the methods discussed.  These scripts are available on GitHub at <a href="https://github.com/AOS55/RLFoundations">RLFoundations</a>. Due to the natural challenges and computational expense of <a href="https://www.natolambert.com/writing/debugging-mbrl">robotic</a> <a href="https://andyljones.com/posts/rl-debugging.html">learning</a>, this repository also includes pre-trained models that can be downloaded from <a href="https://huggingface.co/collections/AOS55/rlfoundations-67b325988a1b0f0b48d5cb68">Hugging Face</a>. Please feel free to modify and use them as you see fit, they primarily demonstrate how to implement the IL and model-free RL methods discussed in this post on the simulated robot.</p>
 <h2 id="imitation-learning">Imitation Learning</h2>
-<p>Imagine trying to exactly describe to someone how to pickup a coffee cup. Try describing exactly how to pick up the cup, accounting for every finger position, force applied, and possible cup variation. It would be almost impossible, it is far easier to simply show someone how to pick up a coffee cup and have them watch you. This intuition, that some tasks are better shown than described - is the core idea behind Imitation Learning (IL).</p>
+<p>Imagine trying to exactly describe to someone how to pickup a coffee cup. Try describing exactly how to pick up the cup, accounting for every finger position, force applied, and possible cup variation. It would be almost impossible, it is far easier to simply show someone how to pick up a coffee cup and have them watch you. This intuition, that some tasks are better shown than described, is the core idea behind Imitation Learning (IL).</p>
 <h3 id="the-main-challenge">The Main Challenge</h3>
 <p>At first glance, IL may seem straightforward: show the robot what to do, and have it copy those actions. The main problem is even if we demonstrate the task perfectly hundreds of times the robot needs to generalise across various initial conditions, in our coffee cup example this could be:</p>
 <ul>
@@ -199,7 +800,7 @@ $$<p>The key problem with DAgger is the need for access to an oracle/expert onli
 $$
 J(\pi)=\mathbb{E}_{\tau \sim \pi} \biggl[ \sum_{t=0}^{\infty} \gamma^{t} R(s_{t},a_{t} ) \biggr] .
 $$<h3 id="the-main-challenge-1">The Main Challenge</h3>
-<p>Using our coffee cup example, rather than showing the robot how to grasp, we specify a reward signal - perhaps +1 for a successful grasp and 0 otherwise. This seemingly simple shift introduces several key challenges:</p>
+<p>Using our coffee cup example, rather than showing the robot how to grasp, we specify a reward signal, perhaps +1 for a successful grasp and 0 otherwise. This seemingly simple shift introduces several key challenges:</p>
 <ol>
 <li>
 <p><strong>Exploration vs Exploitation</strong>, a robot learning to grasp cups faces a crucial tradeoff: Should it stick with a mediocre but reliable grasp strategy, or try new motions that could either lead to better grasps or costly failures? Too much exploration risks dropping cups, while too little may prevent discovering optimal solutions.</p>
@@ -648,28 +1249,28 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>P. F. Hokayem and M. W. Spong, <em>Bilateral Teleoperation: An Historical Survey</em>. Cambridge, UK: Cambridge University Press, 2006.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:2">
-<p>D. J. Reinkensmeyer and J. L. Patton, &ldquo;Can Robots Help the Learning of Skilled Actions?,&rdquo; <em>Progress in Brain Research</em>, vol. 192, pp. 81-97, 2009.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>D. J. Reinkensmeyer and J. L. Patton, &ldquo;Can Robots Help the Learning of Skilled Actions?,&rdquo; <em>Progress in Brain Research</em>, 2009.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:3">
 <p>K. Grauman, A. Westbury, E. Byrne, et al., “Ego4D: Around the World in 3,000 Hours of Egocentric Video,” <em>IEEE Conference on Computer Vision and Pattern Recognition</em> (CVPR), 2022.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:4">
-<p>D. Damen, H. Doughty, G. M. Farinella, S. Fidler, A. Furnari, E. Kazakos, M. Moltisanti, J. Munro, T. Perrett, W. Price, and M. Wray, “EPIC-KITCHENS-100: Dataset and Challenges for Egocentric Perception,” <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, vol. 43, no. 11, pp. 4115–4131, 2021.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>D. Damen, H. Doughty, G. M. Farinella, S. Fidler, A. Furnari, E. Kazakos, M. Moltisanti, J. Munro, T. Perrett, W. Price, and M. Wray, “EPIC-KITCHENS-100: Dataset and Challenges for Egocentric Perception,” <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, 2021.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:5">
-<p>D. A. Pomerleau, “ALVINN: An Autonomous Land Vehicle in a Neural Network,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 1, 1989, pp. 305–313.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>D. A. Pomerleau, “ALVINN: An Autonomous Land Vehicle in a Neural Network,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 1, 1989.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:6">
-<p>J. Ho and S. Ermon, “Generative Adversarial Imitation Learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 29, 2016, pp. 4565–4573.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>J. Ho and S. Ermon, “Generative Adversarial Imitation Learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), vol. 29, 2016.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:7">
-<p>S. Ross, G. Gordon, and D. Bagnell, “A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning,” in <em>Proceedings of the 14th International Conference on Artificial Intelligence and Statistics</em> (AISTATS), 2011, pp. 627–635.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>S. Ross, G. Gordon, and D. Bagnell, “A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning,” in <em>Proceedings of the 14th International Conference on Artificial Intelligence and Statistics</em> (AISTATS), 2011.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:8">
-<p>D. Menda, M. Elfar, M. Cubuktepe, M. J. Kochenderfer, and M. Pavone, “ThriftyDAgger: Budget-Aware Novelty and Risk Gating for Interactive Imitation Learning,” in <em>IEEE/RSJ International Conference on Intelligent Robots and Systems</em> (IROS), 2020, pp. 1165–1172.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>D. Menda, M. Elfar, M. Cubuktepe, M. J. Kochenderfer, and M. Pavone, “ThriftyDAgger: Budget-Aware Novelty and Risk Gating for Interactive Imitation Learning,” in <em>IEEE/RSJ International Conference on Intelligent Robots and Systems</em> (IROS), 2020.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:9">
-<p>A. Zhang and D. Held, “SafeDAgger: Safely Interacting with Human Teachers in Deep Learning for Robotics,” in <em>IEEE International Conference on Robotics and Automation</em> (ICRA), 2017, pp. 614–621.&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>J. Zhang and K. Cho, &ldquo;Query-Efficient Imitation Learning for End-to-End Autonomous Driving,&rdquo; in <em>Advancement of Artificial Intelligence</em> (AAAI), 2017.&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:10">
 <p>S. Ross and D. Bagnell, “Reinforcement and Imitation Learning via Interactive No-Regret Learning,” <em>arXiv preprint arXiv:1406.5979</em>, 2014.&#160;<a href="#fnref:10" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -687,10 +1288,10 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proximal Policy Optimization Algorithms,” <em>arXiv preprint arXiv:1707.06347</em>, 2017.&#160;<a href="#fnref:14" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:15">
-<p>T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine, “Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor,” in <em>International Conference on Machine Learning</em> (ICML), 2018, pp. 1861–1870.&#160;<a href="#fnref:15" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine, “Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor,” in <em>International Conference on Machine Learning</em> (ICML), 2018.&#160;<a href="#fnref:15" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:16">
-<p>H. van Hasselt, “Double Q-learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2010, pp. 2613–2621.&#160;<a href="#fnref:16" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>H. van Hasselt, “Double Q-learning,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2010.&#160;<a href="#fnref:16" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:17">
 <p>D. P. Kingma and M. Welling, “Auto-Encoding Variational Bayes,” in <em>International Conference on Learning Representations</em> (ICLR), 2014.&#160;<a href="#fnref:17" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -699,16 +1300,16 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>L. M. Smith, I. Kostrikov, and S. Levine, “Demonstrating A Walk in the Park: Learning to Walk in 20 Minutes With Model-Free Reinforcement Learning,” in <em>Proceedings of Robotics: Science and Systems</em> (RSS), 2023.&#160;<a href="#fnref:18" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:19">
-<p>G. Williams, A. Aldrich, and E. Theodorou, “Model predictive path integral control: Information theoretic model predictive control,” in <em>IEEE International Conference on Robotics and Automation (ICRA)</em>, 2017, pp. 3192–3199.&#160;<a href="#fnref:19" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>G. Williams, A. Aldrich, and E. Theodorou, “Model predictive path integral control: Information theoretic model predictive control,” in <em>IEEE International Conference on Robotics and Automation (ICRA)</em>, 2017.&#160;<a href="#fnref:19" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:20">
-<p>K. Chua, R. Calandra, R. McAllister, and S. Levine, “Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2018, pp. 4759–4770.&#160;<a href="#fnref:20" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>K. Chua, R. Calandra, R. McAllister, and S. Levine, “Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models,” in <em>Advances in Neural Information Processing Systems</em> (NeurIPS), 2018.&#160;<a href="#fnref:20" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:21">
-<p>Sutton, R. S. (1991). “Dyna, an Integrated Architecture for Learning, Planning, and Reacting.” <em>SIGART Bulletin</em>, 2(4), 160–163.&#160;<a href="#fnref:21" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>Sutton, R. S. “Dyna, an Integrated Architecture for Learning, Planning, and Reacting.” 1991.&#160;<a href="#fnref:21" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:22">
-<p>M. Janner, J. Fu, M. Zhang, and S. Levine, “When to Trust Your Model: Model-Based Policy Optimization,” in <em>Advances in Neural Information Processing Systems (NeurIPS)</em>, 2019, pp. 12498–12509.&#160;<a href="#fnref:22" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>M. Janner, J. Fu, M. Zhang, and S. Levine, “When to Trust Your Model: Model-Based Policy Optimization,” in <em>Advances in Neural Information Processing Systems (NeurIPS)</em>, 2019.&#160;<a href="#fnref:22" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:23">
 <p>N. Carion, F. Massa, G. Synnaeve, N. Usunier, A. Kirillov, and S. Zagoruyko, “End-to-End Object Detection with Transformers,” arXiv preprint arXiv:2005.12872, 2020.&#160;<a href="#fnref:23" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -717,10 +1318,10 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>L. Qiao, Y. Zhao, Z. Li, X. Qiu, J. Wu, and C. Zhang, “DeFRCN: Decoupled Faster R-CNN for Few-Shot Object Detection,” arXiv preprint arXiv:2108.09017, 2021.&#160;<a href="#fnref:24" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:25">
-<p>L.-C. Chen, Y. Zhu, G. Papandreou, F. Schroff, and H. Adam, “Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation,” in European Conference on Computer Vision (ECCV), 2018, pp. 833–851.&#160;<a href="#fnref:25" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>L.-C. Chen, Y. Zhu, G. Papandreou, F. Schroff, and H. Adam, “Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation,” in European Conference on Computer Vision (ECCV), 2018.&#160;<a href="#fnref:25" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:26">
-<p>Z. Zhou, M. M. Rahman Siddiquee, N. Tajbakhsh, and J. Liang, “UNet++: A Nested U-Net Architecture for Medical Image Segmentation,” in Deep Learning in Medical Image Analysis and Multimodal Learning for Clinical Decision Support (DLMIA), 2018, pp. 3–11.&#160;<a href="#fnref:26" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>Z. Zhou, M. M. Rahman Siddiquee, N. Tajbakhsh, and J. Liang, “UNet++: A Nested U-Net Architecture for Medical Image Segmentation,” in Deep Learning in Medical Image Analysis and Multimodal Learning for Clinical Decision Support (DLMIA), 2018.&#160;<a href="#fnref:26" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:27">
 <p>R. Poudel, S. Liwicki, and R. Cipolla, “Fast-SCNN: Fast Semantic Segmentation Network,” in <em>2019 IEEE International Conference on Computer Vision (ICCV) Workshops</em>, 2019,&#160;<a href="#fnref:27" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -735,13 +1336,13 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>E. A. Wan and R. van der Merwe, “The Unscented Kalman Filter for Nonlinear Estimation,” in <em>Proceedings of the IEEE 2000 Adaptive Systems for Signal Processing, Communications, and Control Symposium (AS-SPCC)</em>, Lake Louise, Alberta, Canada, 2000.&#160;<a href="#fnref:30" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:31">
-<p>L. Han, Y. Lin, G. Du, and S. Lian, “DeepVIO: Self-supervised Deep Learning of Monocular Visual Inertial Odometry using 3D Geometric Constraints,” in <em>2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Macau, China, 2019, pp. 6906-6913, doi: 10.1109/IROS40897.2019.8968467.</em>&#160;<a href="#fnref:31" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>L. Han, Y. Lin, G. Du, and S. Lian, “DeepVIO: Self-supervised Deep Learning of Monocular Visual Inertial Odometry using 3D Geometric Constraints,” in <em>2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Macau, China, 2019.</em>&#160;<a href="#fnref:31" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:32">
-<p>Qin, P. Li, and S. Shen, “VINS-Mono: A robust and versatile monocular visual-inertial state estimator,” <em>IEEE Transactions on Robotics</em>, 2018.&#160;<a href="#fnref:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>T. Qin, P. Li, and S. Shen, “VINS-Mono: A robust and versatile monocular visual-inertial state estimator,” <em>IEEE Transactions on Robotics</em>, 2018.&#160;<a href="#fnref:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:33">
-<p>B. Bescos, J. M. Fácil, J. Civera, and J. Neira, “DynaSLAM: Tracking, Mapping and Inpainting in Dynamic Scenes,” <em>IEEE Robotics and Automation Letters</em>, vol. 3, no. 4, pp. 4076–4083, 2018.&#160;<a href="#fnref:33" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>B. Bescos, J. M. Fácil, J. Civera, and J. Neira, “DynaSLAM: Tracking, Mapping and Inpainting in Dynamic Scenes,” <em>IEEE Robotics and Automation Letters</em>, 2018.&#160;<a href="#fnref:33" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:34">
 <p>P. Agarwal, G. D. Tipaldi, L. Spinello, C. Stachniss, and W. Burgard, “Robust Map Optimization Using Dynamic Covariance Scaling,” in <em>Proceedings of the IEEE International Conference on Robotics and Automation</em> (ICRA), 2013.&#160;<a href="#fnref:34" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
@@ -750,7 +1351,7 @@ $$||\hat{s}_{H} - s_{H}|| \approx \|\nabla f_{\theta}\|^H \|\epsilon\|$$<p>where
 <p>T. Naseer, M. Ruhnke, C. Stachniss, L. Spinello, and W. Burgard, “Robust Visual SLAM Across Seasons,” in <em>Proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems</em> (IROS), 2015.&#160;<a href="#fnref:35" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:36">
-<p>C. Cadena, L. Carlone, H. Carrillo, Y. Latif, D. Scaramuzza, J. Neira, I. Reid, and J. J. Leonard, “Past, Present, and Future of Simultaneous Localization and Mapping: Toward the Robust-Perception Age,” <em>IEEE Transactions on Robotics</em>, vol. 32, no. 6, pp. 1309–1332, 2016&#160;<a href="#fnref:36" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>C. Cadena, L. Carlone, H. Carrillo, Y. Latif, D. Scaramuzza, J. Neira, I. Reid, and J. J. Leonard, “Past, Present, and Future of Simultaneous Localization and Mapping: Toward the Robust-Perception Age,” <em>IEEE Transactions on Robotics</em>, 2016.&#160;<a href="#fnref:36" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </div>
