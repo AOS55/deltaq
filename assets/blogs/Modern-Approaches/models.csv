@@ -1,0 +1,15 @@
+Date, Params, Name, Description
+2022-05-01,1200000000,GATO,First generalist agent capable of 600+ tasks including robotics
+2022-10-01,400000000,CLIP-Fields,Semantic fields for robotic memory using weakly supervised learning
+2022-10-01,200000000,VIMA,Multimodal prompts for general robot manipulation tasks
+2022-11-01,50000000,R3M,Universal visual representation for robot manipulation from human videos
+2022-12-01,35000000,RT-1,First major robotics transformer for real-world control at scale
+2023-03-01,562000000000,PaLM-E,Largest embodied multimodal language model for robotics reasoning
+2023-06-01,1180000000,RoboCat,Self-improving foundation agent for robotic manipulation
+2023-07-01,55000000000,RT-2,Vision-Language-Action model transferring web knowledge to robotics
+2024-05-01,27000000,Octo-Small,Open-source generalist robot policy with diffusion-based actions
+2024-05-01,93000000,Octo-Base,Larger open-source generalist policy supporting multiple embodiments
+2024-06-01,7000000000,OpenVLA,Open-source VLA model outperforming RT-2-X with fewer parameters
+2024-10-01,3300000000,π0,Physical Intelligence's first generalist policy with flow matching
+2025-03-01,13000000000,NVIDIA GR00T N1,Humanoid foundation model with dual-system architecture
+2025-04-01,3500000000,π0.5,Enhanced π0 with open-world generalization capabilities

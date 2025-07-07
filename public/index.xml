@@ -13,8 +13,669 @@
     <language>en-us</language>
     <managingEditor>alexander@quessy.io (Alexander Quessy)</managingEditor>
     <webMaster>alexander@quessy.io (Alexander Quessy)</webMaster>
-    <lastBuildDate>Mon, 03 Mar 2025 12:21:10 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 19 Jun 2025 12:21:10 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/deltaq/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Robotic Learning Part 4: Modern Approaches</title>
+      <link>http://localhost:1313/deltaq/posts/modern-approaches/</link>
+      <pubDate>Thu, 19 Jun 2025 12:21:10 +0000</pubDate><author>alexander@quessy.io (Alexander Quessy)</author>
+      <guid>http://localhost:1313/deltaq/posts/modern-approaches/</guid>
+      <description>&lt;p&gt;If I could use one word to describe the advancement of ML or AI in the past couple of years it would be &lt;em&gt;scale&lt;/em&gt;. When GPT-3&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; was released in 2020 and ChatGPT&lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; in 2022, I was impressed with the performance and thought it was essentially a step towards generalisation in Natural Language Processing (NLP), similar to how &lt;a href=&#34;https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf&#34;&gt;AlexNet&lt;/a&gt;&lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt; allowed for generalization in image classification. I did not fully grasp the significance Large Language Models (LLMs) would have on robotics and ML in general. The main idea, that I missed, is the significance and relationship of NLP to problems humans have, language is a very expressive format and a key discovery we made by scaling up these LLMs is that by training over internet scale data we have in fact built a very large and expressive model of human sentiment. Sergey Levine &lt;a href=&#34;https://twimlai.com/podcast/twimlai/%cf%800-a-foundation-model-for-robotics/&#34;&gt;recently described this&lt;/a&gt; as:&lt;/p&gt;</description>
+      <content:encoded><![CDATA[<p>If I could use one word to describe the advancement of ML or AI in the past couple of years it would be <em>scale</em>. When GPT-3<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> was released in 2020 and ChatGPT<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> in 2022, I was impressed with the performance and thought it was essentially a step towards generalisation in Natural Language Processing (NLP), similar to how <a href="https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf">AlexNet</a><sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> allowed for generalization in image classification. I did not fully grasp the significance Large Language Models (LLMs) would have on robotics and ML in general. The main idea, that I missed, is the significance and relationship of NLP to problems humans have, language is a very expressive format and a key discovery we made by scaling up these LLMs is that by training over internet scale data we have in fact built a very large and expressive model of human sentiment. Sergey Levine <a href="https://twimlai.com/podcast/twimlai/%cf%800-a-foundation-model-for-robotics/">recently described this</a> as:</p>
+<blockquote>
+<p>A behavioral model of what humans tend to do with a computer, keyboard, and mouse.</p></blockquote>
+<p>Following the explosion of LLMs, labs with the resources to do so, have begun to develop large scale models for robotics. These scaled-up robotic models have become known as foundation models, serving as the base upon which entire robotic platforms are built. I prefer this term over <em>large</em> since what constitutes large today often becomes small tomorrow. Figure 1 shows the number of parameters each model has against time, though I couldn&rsquo;t find a suitable benchmark for comparison, an issue I will come to later on. Unlike in the LLM space, there isn&rsquo;t a clear <em>bigger is better</em> trend emerging in robotics. Whilst I suspect the recently released <a href="https://deepmind.google/models/gemini-robotics/">Gemini Robotics VLA</a><sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> could be very large given the trend from RT-2 the model specifics are not included in <a href="https://arxiv.org/pdf/2503.20020">the paper</a>. The <em>bigger is better</em> trend hasn&rsquo;t proven true for robotic foundation models, at least not yet. In this article I aim to explore:</p>
+<ul>
+<li><strong>How foundation models work</strong>: The architectural principles behind robotic foundation models, including how they integrate multi-modal data (vision, language, motor control) and differ from pure language models in their design and training approaches.</li>
+<li><strong>Applications and data collection</strong>: Real-world use cases where these models are being deployed, the types of robotics data being collected to train them, and how this data differs from the internet-scale text that powers LLMs.</li>
+<li><strong>Current problems and emerging solutions</strong>: The key limitations facing robotic foundation models today (scaling challenges, benchmarking gaps, deployment issues) and the research directions and technical approaches being developed to address them.</li>
+</ul>
+<div style="width: 100%; height: 500px; margin: 2rem 0;">
+    <canvas id="foundationModelsChart"></canvas>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+<script>
+function loadChart() {
+    if (typeof Chart === 'undefined') {
+        console.log('Chart.js not loaded yet, retrying...');
+        setTimeout(loadChart, 100);
+        return;
+    }
+    
+    console.log('Chart.js loaded successfully');
+    const ctx = document.getElementById('foundationModelsChart').getContext('2d');
+    
+    const chart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Google/DeepMind',
+                data: [
+                    {x: 2022.33, y: 1200000000, name: 'GATO'},
+                    {x: 2022.92, y: 35000000, name: 'RT-1'},
+                    {x: 2023.17, y: 562000000000, name: 'PaLM-E'},
+                    {x: 2023.42, y: 1180000000, name: 'RoboCat'},
+                    {x: 2023.50, y: 55000000000, name: 'RT-2'},
+                ],
+                backgroundColor: 'rgba(66, 133, 244, 0.8)',
+                borderColor: 'rgba(66, 133, 244, 1)',
+                pointRadius: 8,
+                pointHoverRadius: 10
+            }, {
+                label: 'Open Source',
+                data: [
+                    {x: 2022.75, y: 400000000, name: 'CLIP-Fields'},
+                    {x: 2022.75, y: 200000000, name: 'VIMA'},
+                    {x: 2022.83, y: 50000000, name: 'R3M'},
+                    {x: 2024.33, y: 27000000, name: 'Octo-Small'},
+                    {x: 2024.33, y: 93000000, name: 'Octo-Base'},
+                    {x: 2024.42, y: 7000000000, name: 'OpenVLA'}
+                ],
+                backgroundColor: 'rgba(255, 152, 0, 0.8)',
+                borderColor: 'rgba(255, 152, 0, 1)',
+                pointRadius: 8,
+                pointHoverRadius: 10
+            }, {
+                label: 'Physical Intelligence',
+                data: [
+                    {x: 2024.75, y: 3300000000, name: 'π0'},
+                    {x: 2025.25, y: 3500000000, name: 'π0.5'}
+                ],
+                backgroundColor: 'rgba(52, 168, 83, 0.8)',
+                borderColor: 'rgba(52, 168, 83, 1)',
+                pointRadius: 8,
+                pointHoverRadius: 10
+            }, {
+                label: 'NVIDIA',
+                data: [
+                    {x: 2025.17, y: 13000000000, name: 'GR00T N1'}
+                ],
+                backgroundColor: 'rgba(118, 255, 3, 0.8)',
+                borderColor: 'rgba(118, 255, 3, 1)',
+                pointRadius: 8,
+                pointHoverRadius: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Foundation Models in Robotics: Parameters vs Time',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].raw.name;
+                        },
+                        label: function(context) {
+                            const params = context.parsed.y;
+                            let paramStr;
+                            if (params >= 1e9) {
+                                paramStr = (params / 1e9).toFixed(1) + 'B';
+                            } else if (params >= 1e6) {
+                                paramStr = (params / 1e6).toFixed(0) + 'M';
+                            } else {
+                                paramStr = params.toLocaleString();
+                            }
+                            return `${context.dataset.label}: ${paramStr} parameters`;
+                        },
+                        afterLabel: function(context) {
+                            const year = Math.floor(context.parsed.x);
+                            const month = Math.round((context.parsed.x - year) * 12);
+                            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            return `Released: ${monthNames[month]} ${year}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    min: 2022,
+                    max: 2025.5,
+                    title: {
+                        display: true,
+                        text: 'Release Date',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    ticks: {
+                        stepSize: 0.5,
+                        callback: function(value) {
+                            const year = Math.floor(value);
+                            const month = Math.round((value - year) * 12);
+                            if (month === 0) return year.toString();
+                            if (month === 6) return `Mid ${year}`;
+                            return '';
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                y: {
+                    type: 'logarithmic',
+                    min: 10000000,
+                    max: 1000000000000,
+                    title: {
+                        display: true,
+                        text: 'Parameters (Log Scale)',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            if (value >= 1e9) return (value / 1e9) + 'B';
+                            if (value >= 1e6) return (value / 1e6) + 'M';
+                            return value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Start loading when DOM is ready
+document.addEventListener('DOMContentLoaded', loadChart);
+</script>
+<h2 id="foundation-models">Foundation Models</h2>
+<p>To understand how foundation models work, let&rsquo;s first briefly examine how LLMs work, as these form the basis of how foundation models are applied across different domains. Modern LLM development follows a two-stage process: pre-training and post-training. Pre-training involves training the core LLM architecture on large datasets to learn language patterns and world knowledge. <a href="https://arxiv.org/pdf/2411.15124">Post-training</a><sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> then fine-tunes the model through techniques like Supervised Fine-Tuning (SFT) and Reinforcement Learning from Human Feedback (RLHF) to improve alignment and task-specific capabilities.</p>
+<p>The general objective function of an LLM during pre-training can be thought of as:</p>
+<blockquote>
+<p>Given a sequence of words, predict the most likely next word.</p></blockquote>
+<p>This process involves 3 key components/processes:</p>
+<ol>
+<li><strong>Embedding</strong>, converts text into a tokenized vector representation. Tokenization first breaks text into subword units (tokens), which are then mapped to learned vector embeddings which capture the semantic meaning in high-dimensional space.</li>
+<li><strong>Transformers</strong>, are the main building blocks of the LLM architecture. Each transformer contains an attention mechanism that allows tokens to selectively focus on and communicate with other relevant tokens in the sequence. Typically, a Multi Layer Perceptron (MLP) further refines each token&rsquo;s representation. Multiple transformer layers are stacked on top of each other to build deep networks.</li>
+<li><strong>Output Probabilities</strong>, the final linear and softmax layers transform the processed embeddings into a probability distribution over the entire vocabulary, determining which token is most likely to come next.</li>
+</ol>
+<p>Several excellent resources help explain how <a href="https://poloclub.github.io/transformer-explainer/">transformers</a> and <a href="https://www.youtube.com/watch?v=wjZofJX0v4M">LLMs</a> work. I particularly recommend <a href="https://bbycroft.net/llm">this visualisation</a>. Figure 2 shows the general structure of LLMs as a block architecture.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/Modern-Approaches/LLM.png"
+             style="display: block; margin: 0 auto; height: 200px;"
+             alt="Figure 2: LLM Block architecture."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 2: LLM Block architecture.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p>For language models and foundation models in general, it is best to think of everything as vectors. This vector representation allows mathematical operations and enables models to process and manipulate semantic information numerically. The input can be represented as a vector:</p>
+$$
+    \mathbf{x} = (x_{0}, x_{1}, x_{2}, \ldots, x_{n}).
+$$<p>The prevailing approach to large scale modelling are autoregressive where the output is represented as:</p>
+$$
+    P(\mathbf{y}|\mathbf{x}) = \prod_{i=1}^{n} P(y_{i} | \mathbf{x}, y_{1:i-1}).
+$$<p>This equation represents the chain rule of probability, where $y_{1:i-1}$ denotes all previous tokens up to position $i-1$. In practical terms, this autoregressive approach means that LLMs generate text one token at a time, with each new token conditioned on both the original input and all previously generated tokens.</p>
+<h3 id="general-foundation-models">General Foundation Models</h3>
+<p>While LLMs exclusively process text tokens, the same transformer architecture and training methodology can be adapted to handle other types of sequential data including:</p>
+<ul>
+<li><strong>Images</strong>, are divided into patches and treated as visual tokens. For example <a href="https://openai.com/index/clip/">CLIP</a><sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup> learns joint image-text representations through contrastive training on (image, text) pairs.</li>
+<li><strong>Audio spectrograms</strong>, are tokenized as spectogram patches for <a href="https://arxiv.org/pdf/2104.01778">audio classification</a><sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup>.</li>
+<li><strong>Time series</strong>, data is segmented into windows for <a href="https://arxiv.org/pdf/2202.07125">forecasting</a><sup id="fnref:8"><a href="#fn:8" class="footnote-ref" role="doc-noteref">8</a></sup> and <a href="https://arxiv.org/pdf/2110.02642">anomaly detection</a><sup id="fnref:9"><a href="#fn:9" class="footnote-ref" role="doc-noteref">9</a></sup>.</li>
+<li><strong>Action sequences</strong>, can be tokenised for RL. <a href="https://arxiv.org/pdf/2106.01345">Decision Transformer</a><sup id="fnref:10"><a href="#fn:10" class="footnote-ref" role="doc-noteref">10</a></sup> eliminates value functions entirely by framing RL as a conditional sequence modelling problem.</li>
+<li><strong>Multimodal inputs</strong>, combine multiple token types. <a href="https://arxiv.org/pdf/2204.14198">Flamingo</a><sup id="fnref:11"><a href="#fn:11" class="footnote-ref" role="doc-noteref">11</a></sup>, is an early example of interleaving vision-language sequences. Most modern <em>frontier labs</em> offer multimodal versions of their large-language models. Modern multi-modal examples/foundation models include Meta&rsquo;s <a href="https://www.llama.com">Llama</a><sup id="fnref:12"><a href="#fn:12" class="footnote-ref" role="doc-noteref">12</a></sup>, X.AIs <a href="https://x.ai/news/grok-1.5v">Grok-1.5v</a>, Anthropic&rsquo;s <a href="https://docs.anthropic.com/en/docs/intro">Claude</a>, OpenAI&rsquo;s <a href="https://cookbook.openai.com/topic/multimodal">GPT4o</a><sup id="fnref:13"><a href="#fn:13" class="footnote-ref" role="doc-noteref">13</a></sup> and Google/DeepMind&rsquo;s <a href="https://ai.google.dev/gemini-api/docs">Gemini</a><sup id="fnref:14"><a href="#fn:14" class="footnote-ref" role="doc-noteref">14</a></sup>. These can handle text, images, audio and video.</li>
+</ul>
+<h3 id="robotic-foundation-models">Robotic Foundation Models</h3>
+<p>Foundation models for robotics face a fundamentally different challenge than pure language models, the need to interact with the physical world. While LLMs predict the next token in a text sequence, robotic foundation models must predict actions that will be executed by physical systems in the real world. This shift from virtual to physical introduces several key differences. Robotic foundation models need to:</p>
+<ul>
+<li>Understand the embodiment constraints of the robot, meaning the model must comprehend the robots physical limitations, spatial relationships and potential outcomes.</li>
+<li>The model must also run in real-time creating lower latency demands for safe operation.</li>
+<li>Multimodal integration is essential as robots need to process vision, proprioception, language instructions and other sensor inputs simultaneously.</li>
+</ul>
+<p>The most successful robotic foundation models follow the Vision-Language-Action (VLA) paradigm, which extends the transformer architecture to handle three key modalities:</p>
+<ul>
+<li><strong>Vision</strong>, processes camera feeds and depth sensors tokenised as image patches.</li>
+<li><strong>Language</strong>, handles natural language instructions and task descriptions.</li>
+<li><strong>Action</strong>, converts robot joint commands and end-effector movements into discrete tokens.</li>
+</ul>
+<p><a href="https://robotics-transformer1.github.io">RT-1</a><sup id="fnref:15"><a href="#fn:15" class="footnote-ref" role="doc-noteref">15</a></sup> (Robot Transformer) was the first robotic foundation model, developed by Google Robotics and Everyday Robotics in 2022. The system was trained on approximately 130,000 robot demonstrations collected over 17 months using a fleet of 13 robots, covering over 700 distinct tasks across multiple kitchen-based environments. RT-1 was trained and deployed on Everyday Robots mobile manipulator robots, a 7 degree of freedom robot with a 2 finger gripper and mobile base shown in Figure 3.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/Modern-Approaches/RT-1.webp"
+             style="display: block; margin: 0 auto; height: 200px;"
+             alt="Figure 3: Everyday Robot platform."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 3: Everyday Robot platform.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p>RT-1&rsquo;s architecture is designed for both high performance and real-time operation. The system takes natural language instructions and images from 6 cameras as input, processing them through a <a href="https://arxiv.org/pdf/2206.00050">FiLM-conditioned EfficientNet-B3</a><sup id="fnref:16"><a href="#fn:16" class="footnote-ref" role="doc-noteref">16</a></sup> that combines language and vision information early in the pipeline. The resulting 81 tokens are compressed to just 8 tokens using <a href="https://arxiv.org/pdf/2106.11297">TokenLearner</a><sup id="fnref:17"><a href="#fn:17" class="footnote-ref" role="doc-noteref">17</a></sup>, which retains only the most important information. These compressed tokens feed into a Transformer with 8 attention layers that outputs discrete action commands across 11 dimensions: 7 for arm movement, 3 for base movement, and 1 for mode selection, with each dimension divided into 256 possible values. Despite having 35 million parameters, this design runs at 3 Hz for real-time robot control.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/Modern-Approaches/RT1Architecture.png"
+             style="display: block; margin: 0 auto; height: 200px;"
+             alt="Figure 4: RT1 Architecture."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 4: RT1 Architecture.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h2 id="advancing-vlas">Advancing VLAs</h2>
+<p>Over the past several years LLM developers have leveraged massive datasets scraped from the internet to rapidly develop their model capabilities. Robotics doesn&rsquo;t have this luxury. Unlike text, which exists abundantly online, robotic learning requires physical interaction data: demonstrations of robots manipulating objects, navigating environments, and performing tasks in the real world. This embodied data is expensive to collect, difficult to standardize across different robotic platforms, and challenging to scale. As a result, robotics lacks the massive, unified datasets that have powered breakthroughs in NLP, creating a significant bottleneck for developing capable robot foundation models.</p>
+<p>This has pushed robotics labs to develop several novel approaches towards data collection and model design. Collaborative data collection across different laboratories and robot types is one promising direction, though the largest dataset currently available, the <a href="https://robotics-transformer-x.github.io">Open-X Embodiment Dataset</a><sup id="fnref:18"><a href="#fn:18" class="footnote-ref" role="doc-noteref">18</a></sup> is still relatively limited. Out of 73 datasets, 55 focus on single-arm manipulation with tabletop setups using toy kitchen objects, and data collection still predominantly relies on human experts using VR or haptic devices. Companies like <a href="https://covariant.ai/insights/the-future-of-robotics-robotics-foundation-models-and-the-role-of-data/">Covariant</a> have found success combining real-world data with synthetic data, while others are exploring reinforcement learning in production environments.</p>
+<p>Evaluating progress across these diverse approaches remains challenging since current VLA models show significant variation in performance across different tasks and robot platforms, and there&rsquo;s no standardized robotic setup. However, several key metrics have emerged that are useful for practitioners and have generally shown improvement across VLA development:</p>
+<ul>
+<li><strong>Inference Speed</strong> measures how quickly the model can generate actions. Unlike LLMs where users can tolerate multi-second response times, robots require real-time control, modern VLAs achieve anywhere from 6Hz (OpenVLA) to 120Hz (GR00T N1&rsquo;s fast system).</li>
+<li><strong>Memory Requirements</strong> determine the hardware needed for deployment. VLAs face unique constraints compared to LLMs since they often must run on-device or locally to minimize response latency. Recent advances in quantization and architecture design have reduced model memory footprints significantly.</li>
+<li><strong>Training Efficiency</strong> encompasses both initial training time and fine-tuning speed for new tasks or robot platforms. Since the deployment platform often differs from the training environment, efficient adaptation becomes crucial. Modern approaches like <a href="CITATION">LoRA fine-tuning can reduce training time by 70%</a>, while some models now require <a href="CITATION">as few as 50 demonstration episodes to learn new behaviors</a>.</li>
+</ul>
+<p>Beyond these quantifiable metrics, VLAs have improved in areas that are more challenging to measure directly, such as zero-shot generalization to novel objects, cross-task transfer capabilities, and overall success rates across diverse manipulation scenarios. These improvements reflect the field&rsquo;s progression from narrow, task-specific policies to generalizable robotic foundation models.</p>
+<h3 id="early-vlas">Early VLAs</h3>
+<p><a href="https://robotics-transformer2.github.io">RT-2</a><sup id="fnref:19"><a href="#fn:19" class="footnote-ref" role="doc-noteref">19</a></sup> extended RT-1 and coined the term VLA. By adapting pre-trained VLMs, using either <a href="https://arxiv.org/abs/2305.18565">PaLI-X</a><sup id="fnref:20"><a href="#fn:20" class="footnote-ref" role="doc-noteref">20</a></sup> (55B) or <a href="https://palm-e.github.io/">PaLM-E</a><sup id="fnref:21"><a href="#fn:21" class="footnote-ref" role="doc-noteref">21</a></sup> (562B) as base architectures. Rather than training robotic policies from scratch, RT-2 finetunes these VLMs on a mixture of web data and robot trajectories, maintaining the original language capabilities while learning robotic control. The main innovation is in representing robot actions as natural language tokens (e.g. [2, 64, 30, 1, 0, 1, 0], for discrete arm and gripper commands), allowing the same transformer architecture to generate both text and robot actions. During robotic tasks, RT-2 constrains its vocabulary to valid action tokens through dynamic vocabulary masking. This approach allowed for compositional reasoning, RT-2 can follow abstract instructions like &ldquo;place the apple next to the coffee mug&rdquo; or &ldquo;move the block onto the number that equals 3*2&rdquo;.</p>
+
+
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="http://localhost:1313/deltaq/blogs/Modern-Approaches/RT2Tabasco.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <figcaption>
+        <p>Figure 5: RT-2 pushing the blue block to the tabasco bottle.</p>
+    </figcaption>
+    
+</figure>
+<p><a href="https://openvla.github.io/">OpenVLA</a><sup id="fnref:22"><a href="#fn:22" class="footnote-ref" role="doc-noteref">22</a></sup> achieved better performance than RT-2&rsquo;s 55B parameter model using only 7B parameters. The model uses a <a href="https://arxiv.org/pdf/2402.07865">Prismatic-7B vision-language foundation</a><sup id="fnref:23"><a href="#fn:23" class="footnote-ref" role="doc-noteref">23</a></sup> based on <a href="https://www.llama.com/llama2/">LLama2</a><sup id="fnref:24"><a href="#fn:24" class="footnote-ref" role="doc-noteref">24</a></sup> with a fused visual encoder. This encoder combines SigLIP<sup id="fnref:25"><a href="#fn:25" class="footnote-ref" role="doc-noteref">25</a></sup> (contrastive text-image embeddings similar to CLIP) and DINOv2<sup id="fnref:26"><a href="#fn:26" class="footnote-ref" role="doc-noteref">26</a></sup> (a visual foundation model for patch and class token embeddings) projecting them into LLaMA-2&rsquo;s token space for action prediction. OpenVLA&rsquo;s main innovation is a more efficient action tokenization scheme. While RT-2 represents actions as strings like &ldquo;move_arm(x=0.5, y=0.3, z=0.2, gripper=open)&rdquo;, OpenVLA directly tokenizes continuous action values as numerical tokens: [0.5, 0.3, 0.2, 1.0, 0.0, 0.0, 0.0] corresponding to 3D position, quaternion rotation, and gripper state. This reduces vocabulary overhead and improves training stability. OpenVLA was trained on 970k robot trajectories from the <a href="https://robotics-transformer-x.github.io/">Open X-Embodiment dataset</a><sup id="fnref1:18"><a href="#fn:18" class="footnote-ref" role="doc-noteref">18</a></sup> spanning 22 different robot embodiments. The model can be fine-tuned using <a href="https://arxiv.org/abs/2106.09685">LoRA</a><sup id="fnref:27"><a href="#fn:27" class="footnote-ref" role="doc-noteref">27</a></sup> techniques for new tasks and achieves 16.5% better task success rates than <a href="https://robotics-transformer-x.github.io/">RT-2-X</a> across 29 evaluation tasks while running at 6Hz inference speed.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/Modern-Approaches/OpenVLA.png"
+             style="display: block; margin: 0 auto; height: 200px;"
+             alt="Figure 6: OpenVLA Architecture."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 6: OpenVLA Architecture.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h3 id="continuous-vlas">Continuous VLAs</h3>
+<p>All models discussed so far are discrete. The output actions sent to the robot are quantized, typically into 256 bins per action dimension <sup id="fnref:28"><a href="#fn:28" class="footnote-ref" role="doc-noteref">28</a></sup>. While this quantization makes it easier to debug and validate model outputs, it creates challenges for fine-grained control and smooth motion generation. In contrast, continuous VLAs generate raw motor commands or joint positions directly from visual and language inputs without quantization.</p>
+<p><a href="https://www.physicalintelligence.company/blog/pi0">Physical Intelligence&rsquo;s $\pi_{0}$</a><sup id="fnref:29"><a href="#fn:29" class="footnote-ref" role="doc-noteref">29</a></sup>​ model exemplifies this approach, using <a href="https://diffusionflow.github.io/">flow matching</a><sup id="fnref:30"><a href="#fn:30" class="footnote-ref" role="doc-noteref">30</a></sup> to generate 50Hz continuous control signals for dexterous manipulation tasks. Flow matching is a diffusion-inspired generative modeling technique that learns to transform Gaussian noise into structured action trajectories. Unlike diffusion models which require multiple denoising steps, flow matching enables real-time control by directly generating smooth action sequences. $\pi_{0}$​ uses a hybrid architecture with a 3B parameter VLM based on <a href="https://ai.google.dev/gemma/docs/paligemma">PaliGemma</a><sup id="fnref:31"><a href="#fn:31" class="footnote-ref" role="doc-noteref">31</a></sup> for vision-language processing, and a separate 300 million parameter action expert that handles proprioceptive states and generates continuous actions via flow matching. The model was trained on over 10,000 hours of robot data from 7 different robot platforms across 68 distinct tasks, enabling it to perform complex dexterous manipulation like folding laundry, table bussing, and precise object handling that require the fine motor control impossible with discrete action spaces.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/Modern-Approaches/pi0.png"
+             style="display: block; margin: 0 auto; height: 200px;"
+             alt="Figure 7: $\pi_{0}$ Architecture."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 7: $\pi_{0}$ Architecture.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<p><a href="https://www.figure.ai/news/helix">Figure AI&rsquo;s Helix model</a> uses a dual-system architecture to address the tradeoff between generalisation and speed in VLA models. System 2 (S2) is a 7B parameter VLM operating at 7-9 Hz for scene understanding and language comprehension, while System (S1) is an 80M parameter cross-attention encoder-decoder transformer that handles low-level control at 200Hz. This seperation allows each system to operate at its optimal timescale. S2 can <em>think slow</em> about high-level goals, while S1 <em>thinks fast</em> to execute precise actions. S2&rsquo;s latent vector is projected onto S1&rsquo;s token space and concatenated with visual features from S1&rsquo;s vision backbone along the sequence dimension, providing task conditioning. This latent vector is a semantic embedding that encodes S2&rsquo;s understanding of the scene and language instruction for S1&rsquo;s motor control. S1 outputs continuous control signals including wrist poses, finger flexion, and abduction control at 200Hz. Helix was trained on approximately 500 hours of teleoperated behaviours and can simultaneously control 2 robots working on shared manipulation tasks. Unfortunately, Figure AI is closed source and outside their blog post there is not a huge amount more information available.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/Modern-Approaches/Helix.png"
+             style="display: block; margin: 0 auto; height: 220px;"
+             alt="Figure 8: Helix Dual System Architecture."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 8: Helix Dual System Architecture.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h3 id="efficient-vlas">Efficient VLAs</h3>
+<p>While models like RT-2 and $\pi_{0}$ demonstrate impressive capabilities, their computational requirements limit practical deployment. A parallel research direction focuses on efficiency optimization—achieving good performance with fewer parameters and less compute.</p>
+<ul>
+<li><a href="https://cogact.github.io/"><strong>CogACT</strong></a><sup id="fnref:32"><a href="#fn:32" class="footnote-ref" role="doc-noteref">32</a></sup> breaks from the monolithic VLM approach used in RT-2 and OpenVLA by separating cognitive and action capabilities into distinct modules. Unlike previous VLAs that adapt vision-language models end-to-end, CogACT uses a dedicated 300M parameter Diffusion Transformer specifically for action modeling, while keeping the Prismatic-7B VLM focused purely on vision-language understanding. This separation allows independent optimization of each component and enables the action module to specialize in temporal action sequences.</li>
+<li><a href="https://tiny-vla.github.io/"><strong>TinyVLA</strong></a><sup id="fnref:33"><a href="#fn:33" class="footnote-ref" role="doc-noteref">33</a></sup> eliminates the pre-training stage entirely—a departure from the standard VLM robot fine-tuning pipeline. Instead of starting with large pre-trained VLMs like RT-2 or OpenVLA, TinyVLA directly integrates diffusion policy decoders during fine-tuning on robot data, significantly reducing training costs while maintaining performance.</li>
+<li><a href="https://huggingface.co/blog/smolvla"><strong>SmolVLA</strong></a><sup id="fnref:34"><a href="#fn:34" class="footnote-ref" role="doc-noteref">34</a></sup> represents the extreme end of parameter efficiency, using a 450M parameter model with SmolVLM2 as its backbone and a 100M parameter action expert. Designed for consumer-grade hardware, SmolVLA demonstrates that effective robotic control doesn&rsquo;t require massive models. The model was trained exclusively on community-contributed datasets, showing how smaller models can leverage diverse data sources that might be insufficient for larger architectures.</li>
+</ul>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/Modern-Approaches/SmolVLA.png"
+             style="display: block; margin: 0 auto; height: 220px;"
+             alt="Figure 9: SmolVLA Architecture."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 9: SmolVLA Architecture.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h2 id="limitations-and-open-problems">Limitations and Open Problems</h2>
+<p>Despite remarkable progress, VLA models still face fundamental challenges that constrain deployment beyond controlled laboratory settings. Understanding these limitations is crucial for building reliable robotic systems that can operate safely in the real world.</p>
+<h3 id="data-bottleneck">Data Bottleneck</h3>
+<p>VLA models suffer from a fundamental data scarcity problem that makes their development different from their language model counterparts. While GPT-style models train on billions of text examples scraped from the internet, even the largest robotic datasets remain tiny by comparison. OpenVLA, one of the most trained VLAs, used approximately 970,000 trajectories from the Open X-Embodiment dataset using 22 robot platforms, still orders of magnitude smaller than typical language model training sets.</p>
+<p>This scarcity stems from the inherent economics of robotic data collection. Unlike text, which exists abundantly online, robotic learning requires physical interaction data that must be generated through expensive human tele-operation or autonomous exploration. Physical Intelligence estimates robotic data collection costs approximately 50 - 100 dollars per hour, compared to pennies for text data. The <a href="https://robotics-transformer1.github.io/">RT-1 dataset</a> required 17 months of continuous data collection using a fleet of 13 robots to gather 130,000 demonstrations across 700 tasks, a massive undertaking that produced what would be considered a small dataset in the language modeling world. Larger datasets are beginning to emerge however, <a href="https://agibot-world.com/">AgiBot Colloseo</a><sup id="fnref:35"><a href="#fn:35" class="footnote-ref" role="doc-noteref">35</a></sup> passes just over one million and invests serious infrastructure to access the datasets.</p>
+<p>The computational scaling challenges compound this problem. For example, RT-2&rsquo;s 55B parameter model required 64 NVIDIA A100 GPUs running for 15 days to fully train. This would cost approximately $60,000 on most commercial clouds, too much for most university&rsquo;s departments research budgets! This carries over to deployment as well. Unlike language models that can leverage cloud-based inference, real-time robotic control demands low-latency responses that often necessitate running models locally, introducing additional hardware constraints.</p>
+<p>Recent advances in synthetic data generation offer promising but incomplete solutions. NVIDIA&rsquo;s <a href="https://developer.nvidia.com/isaac/gr00t">Isaac GR00T Blueprint</a><sup id="fnref:36"><a href="#fn:36" class="footnote-ref" role="doc-noteref">36</a></sup> can generate <a href="https://nvidianews.nvidia.com/news/nvidia-isaac-gr00t-n1-open-humanoid-robot-foundation-model-simulation-frameworks">780,000 synthetic trajectories in 11 hours</a>, equivalent to 6,500 hours of human demonstration data. However, sim-to-real transfer typically sees 50-80% performance drops when moving from simulation to physical hardware. The challenge lies not just in generating realistic physics simulation, but in capturing the subtle environmental variations and edge cases that robots encounter in real-world deployment.</p>
+
+
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="http://localhost:1313/deltaq/blogs/Modern-Approaches/issacgroot.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <figcaption>
+        <p>Figure 10: Isaac GR00T-N1.5-3B in action.</p>
+    </figcaption>
+    
+</figure>
+<p>One exciting but underexplored idea is the <a href="https://openreview.net/pdf?id=W_TkB-1eNbs"><em>robotics research cloud</em></a><sup id="fnref:37"><a href="#fn:37" class="footnote-ref" role="doc-noteref">37</a></sup>, shared facilities with fleets of standardized robots accessible remotely over the internet. Instead of every lab investing hundreds of thousands of dollars on robots that often sit idle between experiments, researchers could pool resources and share access. Teams could upload their VLA policies, run evaluations across diverse manipulation tasks, and collect trajectory data for future training iterations—all without maintaining their own physical labs. Small-scale versions exist <a href="https://liwanggt.github.io/files/Robotarium_CSM_Impact.pdf">Georgia Tech&rsquo;s Robotarium</a><sup id="fnref:38"><a href="#fn:38" class="footnote-ref" role="doc-noteref">38</a></sup>, <a href="https://arxiv.org/pdf/2308.07741">Real Robot Challenge</a><sup id="fnref:39"><a href="#fn:39" class="footnote-ref" role="doc-noteref">39</a></sup>, but scaling this to manipulation tasks could provide the standardized infrastructure that VLA development needs. This approach could democratise access to robotics by offering <em>robotic training as a service</em>, similar to how cloud providers <a href="https://azure.microsoft.com/en-gb/resources/cloud-computing-dictionary/what-is-cloud-infrastructure">simplify infrastructure</a> for software development. Helping address what is becoming a growing problem of scale.</p>
+<h3 id="safety-and-reliability-in-physical-systems">Safety and Reliability in Physical Systems</h3>
+<p>The transition from laboratory demonstrations to real-world deployment exposes critical safety limitations that don&rsquo;t exist in purely digital AI systems. When language models hallucinate, the consequence is typically an incorrect text output. When VLA models hallucinate, robots can perform dangerous actions including collision failures, incorrect force application, or unsafe trajectories that could cause physical damage or human injury.</p>
+<p><a href="https://arxiv.org/pdf/2409.12894">VLATest</a><sup id="fnref:40"><a href="#fn:40" class="footnote-ref" role="doc-noteref">40</a></sup> recently evaluated several VLAs across 18,604 testing scenes and showed that models often exhibit significant performance degradation under relatively minor environmental changes. Success rates drop dramatically with variations in lighting conditions, camera angles, or obstacle configuration. Models also frequently misidentify target objects when distractors are present, leading to task failures that could be a direct safety risk in production environments.</p>
+<p>The reliability challenges extend beyond environmental sensitivity to fundamental issues with <a href="https://vla-safe.github.io">uncertainty quantification and failure detection</a><sup id="fnref:41"><a href="#fn:41" class="footnote-ref" role="doc-noteref">41</a></sup>. Current VLA models lack robust mechanisms for recognizing when they are operating outside their training distribution or when their confidence in a particular action sequence is low. Unlike the controlled environments often showcased in VLA papers, real-world deployment introduces countless edge cases and environmental variations that weren&rsquo;t captured in training data.</p>
+<p>Recent commercial deployments highlight both progress and persistent limitations. Physical Intelligence&rsquo;s <a href="https://arxiv.org/pdf/2504.16054">$\pi_{0.5}$ model</a><sup id="fnref:42"><a href="#fn:42" class="footnote-ref" role="doc-noteref">42</a></sup> operates successfully in rental homes in San Francisco, showing progress of open-world generalisation beyond laboratory settings. Figure AI has certified and deployed their robots in <a href="https://www.bmwgroup.com/en/news/general/2024/humanoid-robots.html">BMWs manufacturing operations</a>.</p>
+<p>The threat of bad actors is also a concern and research is emerging into <a href="https://arxiv.org/pdf/2506.03350">VLA adversarial attacks</a><sup id="fnref:43"><a href="#fn:43" class="footnote-ref" role="doc-noteref">43</a></sup>. VLA models remain susceptible to <a href="https://arxiv.org/pdf/2409.13174v1">patch-based attacks</a><sup id="fnref:44"><a href="#fn:44" class="footnote-ref" role="doc-noteref">44</a></sup> in both digital and physical settings, where carefully crafted visual perturbations can induce path deviations and disrupt spatial perception. While such attacks might seem academic, they reveal fundamental brittleness in the models&rsquo; visual processing that could be triggered by natural environmental features or wear patterns on equipment.</p>
+<h3 id="generalisation-and-transfer-learning">Generalisation and Transfer Learning</h3>
+<p>VLAs represent a significant step toward general-purpose robotic intelligence, yet their deployment beyond controlled laboratory settings reveals fundamental limitations in generalisation and transfer learning. Understanding these challenges, and the emerging solutions to address them, is key to the field&rsquo;s progression toward general robotic systems.</p>
+<p>Modern VLAs perform poorly when confronted with scenarios outside their training distribution. OpenVLA completely fails on unseen environments without fine-tuning on each new deployment scenarios. This is a significant problem when considering the diversity of real world environments where robots are expected to operate.</p>
+<p>Several promising solutions are emerging to address this challenge. RT-2 demonstrates improved generalisation primarily through exposure to large-scale internet data during training, which provides broader world knowledge. However, the recently released <a href="https://www.physicalintelligence.company/download/pi05.pdf">$\pi_{0.5}$</a><sup id="fnref1:42"><a href="#fn:42" class="footnote-ref" role="doc-noteref">42</a></sup> model from Physical Intelligence represents more significant progress towards this goal. It achieved the first demonstration of a robot successfully performing complex household tasks in completely unseen homes without any additional training. $\pi_{0.5}$ accomplishes this through two main innovations:</p>
+<ul>
+<li><strong>Heterogeneous co-training</strong>: Rather than training solely on target robot data, $\pi_{0.5}$ learns from a diverse mixture including mobile robot demonstrations across 100+ homes, data from other robot types, high-level semantic prediction tasks, web-scale vision-language data, and verbal instructions from human supervisors. This varied training regime helps the model develop more robust and transferable representations.</li>
+<li><strong>A hierarchical reasoning system</strong>: Similar to <a href="https://arxiv.org/pdf/2201.11903">Chain-of-Thought (CoT)</a><sup id="fnref:45"><a href="#fn:45" class="footnote-ref" role="doc-noteref">45</a></sup> in LLMs, $\pi_{0.5}$ first predicts high-level semantic subtasks before generating low-level motor commands. This separation allows the model to leverage different types of knowledge at each level, semantic understanding from web data for high level planning, and precise motor skills from robot demonstrations for execution.</li>
+</ul>
+
+
+<figure style="margin: 20px 0; text-align: center;">
+    <div style="display: flex; justify-content: center;">
+        <video width="640" height="360" controls style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <source src="http://localhost:1313/deltaq/blogs/Modern-Approaches/pikitchen.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <figcaption>
+        <p>Figure 11: $\pi_{0.5}$ kitchen tasks in a new kitchen.</p>
+    </figcaption>
+    
+</figure>
+<p>I strongly recommend reading the <a href="https://www.physicalintelligence.company/download/pi05.pdf">$\pi_{0.5}$</a><sup id="fnref2:42"><a href="#fn:42" class="footnote-ref" role="doc-noteref">42</a></sup> paper as it contains some fascinating details about their specific implementations and evaluations.</p>
+<p>Similar challenges initially plagued cross-embodiment generalisation, where models struggled to transfer skills across different robot bodies. However, recent advancements, particularly with <a href="https://arxiv.org/pdf/2310.08864">RT-2-X</a> and $\pi_{0}$, have begun to bridge this gap. These models have shown improved generalisation by primarily scaling up the diversity and volume of training data, allowing them to learn more robust and transferable representations that are less tied to a specific robot&rsquo;s physical form.</p>
+<p>Evaluation for VLAs is still relatively limited compared to LLMs, which is also an area that is lagging. In general VLAs autoregressive nature makes them relatively myopic, they optimise for the immediate next action rather than planning entire sequences. This means they often struggle with more complex reasoning tasks and long-horizon planning. <a href="https://vlabench.github.io">VLABench</a><sup id="fnref:46"><a href="#fn:46" class="footnote-ref" role="doc-noteref">46</a></sup>, a VLA manipulation simulation evaluation environment, found that over 100 task categories VLAs exhibit a 20% success rate on tasks that required complex reasoning or planning. These results were not compared against $\pi_{0.5}$ which may have made progress if compared against these.</p>
+<p>There is still no unified evaluation benchmark for VLA evaluation. VLABench and <a href="https://github.com/mees/calvin">CALVIN</a><sup id="fnref:47"><a href="#fn:47" class="footnote-ref" role="doc-noteref">47</a></sup> are good synthetic benchmarks for general purpose robotic manipulation, and the recently released <a href="https://arxiv.org/pdf/2502.09560">EmbodiedBench</a><sup id="fnref:48"><a href="#fn:48" class="footnote-ref" role="doc-noteref">48</a></sup> looks to offer an exciting range of evaluation tasks. Fundamentally none of these benchmarks are standardised on real robots. Ideally we need a way to evaluate robots performance in the real world on a series of tasks. I suspect we may see something similar to a robot <a href="https://www.caa.co.uk/general-aviation/learning-to-fly/practical-skill-test/">skill test</a> emerging in the next couple of years to evaluate models and validate skills.</p>
+
+
+
+
+    <figure class="text-center " style="text-align: center;">
+        <img loading="lazy" 
+             src="/deltaq/blogs/Modern-Approaches/EmbodiedBench.png"
+             style="display: block; margin: 0 auto; height: 360px;"
+             alt="Figure 12: EmbodiedBench&rsquo;s evaluation types."
+        />
+        
+            <figcaption style="text-align: center; margin-top: 10px;">
+                
+                <p style="text-align: center;">Figure 12: EmbodiedBench&rsquo;s evaluation types.
+                
+                
+                </p>
+            </figcaption>
+        
+    </figure>
+
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>VLA models represent significant progress towards more capable robotic systems, with companies beginning to heavily invest in developing larger and more capable models. However, the field remains in its infancy. Through researching VLAs for this piece, and my own interests, several questions have emerged that I would be excited to see more research on in the short to medium-term:</p>
+<ul>
+<li><strong>What matters in Sim2Real for VLAs?</strong> While we understand that VLAs require fine-tuning for specific tasks, we need further insights into what causes failure when transitioning from simulation into the real world. Understanding these failure modes is essential for building robust VLA systems that can operate reliably in practice.</li>
+<li><strong>How should VLAs compute?</strong> Should we optimise for edge deployment with smaller models running directly on robots, or leverage larger, more capable models running in data centers? This choice has important implications for model development and the design of robotic systems themselves.</li>
+<li><strong>How do we handle VLA hallucination?</strong> LLMs have well-established methods for mitigating hallucination, but VLAs present unique challenges. When a robot hallucinates an action plan, the consequences are physical. How do we recover from bad plans or hallucination in VLAs? Can we do something similar to <a href="https://arxiv.org/pdf/2010.15920">this</a>?</li>
+<li><strong>How do we achieve efficient data collection and curation for VLAs?</strong> Is it better to collect lots of examples of someone completing a task well or to just have a few very high-quality expert demonstrations of that particular task?</li>
+<li><strong>How do we bridge RL and VLAs for continuous improvement?</strong> Traditional robotics has relied heavily on RL for policy optimization. How do we combine the strengths of both approaches? Can we use RL to fine-tune VLA policies for specific tasks while preserving their general capabilities? Or should we develop hybrid architectures where VLAs provide high-level planning while RL handles low-level control?</li>
+</ul>
+<h2 id="citation">Citation</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bibtex" data-lang="bibtex"><span style="display:flex;"><span><span style="color:#a6e22e">@article</span>{quessy2025roboticlearning,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">title</span>   = <span style="color:#e6db74">&#34;Robotic Learning for Curious People&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">author</span>  = <span style="color:#e6db74">&#34;Quessy, Alexander&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">journal</span> = <span style="color:#e6db74">&#34;aos55.github.io/deltaq&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">year</span>    = <span style="color:#e6db74">&#34;2025&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">month</span>   = <span style="color:#e6db74">&#34;July&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">url</span>     = <span style="color:#e6db74">&#34;https://aos55.github.io/deltaq/posts/an-overview-of-robotic-learning/&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="references">References</h2>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>T Brown, et al, <em>Language Models are Few-Shot Learners</em>, arXiv:2005.14165, 2020.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>OpenAI, <em>Introducing ChatGPT</em>, <a href="https://openai.com/index/chatgpt/">https://openai.com/index/chatgpt/</a>, 2022.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>A Krizhevsky, I Sutskever, G E Hinton, <em>ImageNet Classification with Deep Convolutional Neural Networks</em>, NIPS, 2012.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>Gemini Robotics Team, <em>Gemini Robotics: Bringing AI into the Physical World</em>, arXiv:2503.20020, 2025.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p>N Lambert, J Morrison, V Pyatkin, S Huang, H Ivison, F Brahman, L J V. Miranda, et al, Tülu 3: Pushing Frontiers in Open Language Model Post-Training, arXiv:2411.15124, 2025.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:6">
+<p>A Radford, et al, <em>Learning Transferable Visual Models From Natural Language Supervision</em>, arXiv:2103.00020, 2021.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:7">
+<p>Y Gong, YA Chung, J Glass, <em>AST: Audio Spectrogram Transformer</em>, arXiv:2104.01778, 2021.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:8">
+<p>Q Wen, et al, <em>Transformers in Time Series: A Survey</em>, arXiv:2202.07125, 2023.&#160;<a href="#fnref:8" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:9">
+<p>J Xu, H Wu, J Wang, M Long, <em>Anomaly Transformer: Time Series Anomaly Detection with Association Discrepancy</em>, arXiv:2110.02642, 2022.&#160;<a href="#fnref:9" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:10">
+<p>L Chen, K Lu, et al, <em>Decision Transformer: Reinforcement Learning via Sequence Modeling</em>, arXiv:2106.01345, 2021.&#160;<a href="#fnref:10" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:11">
+<p>JB Alayrac, J Donahue, P Luc, A Miech, K Simonyan, et al, <em>🦩Flamingo: a Visual Language Model for Few-Shot Learning</em>, arXiv:2204.14198, 2022.&#160;<a href="#fnref:11" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:12">
+<p>H Touvron, T Lavril, G Izacard, E Grave, G Lample, et al, <em>LLaMA: Open and Efficient Foundation Language Models</em>, arXiv:2302.13971, 2023.&#160;<a href="#fnref:12" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:13">
+<p>OpenAI, <em>GPT-4o System Card</em>, arXiv:2410.21276, 2024.&#160;<a href="#fnref:13" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:14">
+<p>Gemini Team Google, <em>Gemini: A Family of Highly Capable Multimodal Models</em>, arXiv:2312.11805, 2023.&#160;<a href="#fnref:14" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:15">
+<p>A Brohan, et al, <em>RT-1 Robotics Transformer for Real-World Control at Scale</em>, Robotics: Science and Systems, 2023.&#160;<a href="#fnref:15" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:16">
+<p>M O Torkoglu et al, <em>FiLM-Ensemble: Probabilistic Deep Learning via Feature-wise Linear Modulation</em>, arXiv:2206.00050, 2022.&#160;<a href="#fnref:16" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:17">
+<p>M Ryoo, AJ Piergiovanni, A Arnab, M Dehgani, A Angelova, <em>TokenLearner: What Can 8 Learned Tokens Do for Images and Videos?</em>, arXiv:2106.11297, 2022.&#160;<a href="#fnref:17" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:18">
+<p>Open X-Embodiment Collaboration, <em>Open X-Embodiment: Robotic Learning Datasets and RT-X Models</em>, arXiv:2310.08864, 2023.&#160;<a href="#fnref:18" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:18" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:19">
+<p>B Zitkovich, et al, <em>RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control</em>, Proceedings of The 7th Conference on Robot Learning, PMLR 229:2165-2183, 2023.&#160;<a href="#fnref:19" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:20">
+<p>X Chen, et al, <em>PaLI-X: On Scaling up a Multilingual Vision and Language Model</em>, arXiv:2305.18565, 2023.&#160;<a href="#fnref:20" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:21">
+<p>D Driess, et al, <em>PaLM-E: An Embodied Multimodal Language Model</em>, arXiv:2303.03378v1, 2023.&#160;<a href="#fnref:21" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:22">
+<p>M Kim, K Pertsh, S Karamcheti, et al, <em>OpenVLA: An Open-Source Vision-Language-Action Model</em>, 2024.&#160;<a href="#fnref:22" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:23">
+<p>S Karamcheti, S Nair, A Balakrishna, P Liang, T Kollar, D Sadigh, <em>Prismatic VLMs: Investigating the Design Space of Visually-Conditioned Language Models</em>, Proceedings of the 41st International Conference on Machine Learning 2024.&#160;<a href="#fnref:23" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:24">
+<p>H Touvron, T Scialom, et al, <em>Llama 2: Open Foundation and Fine-Tuned Chat Models</em>, arXiv:2307.09288, 2023.&#160;<a href="#fnref:24" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:25">
+<p>X Zhai, B Mustafa, A Kolesinov, L Beyer, <em>Sigmoid Loss for Language Image Pre-Training</em>, arXiv:2303.15343v4, 2023.&#160;<a href="#fnref:25" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:26">
+<p>M Oquab, T Darcet, T Moutakanni, H Vo, M Szafraniec, V Khalidov, P Labatut, A Joulin, P Bojanowski, et al, <em>DINOv2: Learning Robust Visual Features without Supervision</em>, arXiv:2304.07193, 2024.&#160;<a href="#fnref:26" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:27">
+<p>E Hu, Y Shen, et al, <em>LoRA: Low-Rank Adaptation of Large Language Models</em>, arXiv:2106.09685, 2021.&#160;<a href="#fnref:27" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:28">
+<p>Y Wang, H Zhu, M Liu, J Yang, HS Fang, T He, <em>VQ-VLA: Improving Vision-Language-Action Models via Scaling Vector-Quantized Action Tokenizers</em>, arXiv:2507.01016, 2025.&#160;<a href="#fnref:28" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:29">
+<p>K Black, et al, $\pi_{0}$: A Vision-Language-Action Flow Model for General Robot Control&#160;<a href="#fnref:29" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:30">
+<p>Y Limpan, R Chen, H Ben-Hamu, M Nickel, M Lee, <em>Flow Matching for Generative Modelling</em>, arXiv:2210.02747, 2022.&#160;<a href="#fnref:30" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:31">
+<p>L Beyer, A Steiner, A Pinto, A Kolesnikov, X Wang, X Zhai, et al, <em>PaliGemma: A versatile 3B VLM for transfer</em>, arXiv:2407.07726, 2024.&#160;<a href="#fnref:31" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:32">
+<p>Q Li, Y Liang, Z Wang, et al, <em>CogAct: A Foundational Vision-Language-Action Model for Synergizing Cognition and Action in Robotic Manipulation</em>, arXiv:2411.19650, 2024.&#160;<a href="#fnref:32" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:33">
+<p>J Wen, et al, <em>TinyVLA: Towards Fast, Data-Efficient Vision-Language-Action Models for Robotic Manipulation</em>, arXiv:2409.12514, 2025.&#160;<a href="#fnref:33" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:34">
+<p>M Shukor, D Aubakirova, F Capuano, et al. SmolVLA: A vision-language-action model for affordable and efficient robotics, arXiv:2506.01844, 2025.&#160;<a href="#fnref:34" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:35">
+<p>Team AgiBot-World, <em>AgiBot World Colosseo: A Large-scale Manipulation Platform for Scalable and Intelligent Embodied Systems</em>, arXiv:2503.06669, 2025.&#160;<a href="#fnref:35" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:36">
+<p>NVIDIA, <em>GR00T N1: An Open Foundation Model for Generalist Humanoid Robots</em>, arXiv:2503.14734, 2025.&#160;<a href="#fnref:36" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:37">
+<p>V Dean, Y G Shavit, A Gupta, <em>Robots on Demand: A Democratized Robotics Research Cloud</em>, Proceedings of the 5th Conference on Robot Learning, PMLR 164:1769-1775, 2022.&#160;<a href="#fnref:37" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:38">
+<p>D Pickem, P Glotfelter, L Wang, M Mote, A Ames, E Feron, M Egerstedt, <em>The Robotarium: A remotely accessible swarm robotics research testbed</em>, International Conference on Robotics and Automation (ICRA), 2017.&#160;<a href="#fnref:38" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:39">
+<p>N Gürtler, et al, <em>Real Robot Challenge 2022: Learning Dexterous Manipulation from Offline Data in the Real World</em>, Proceedings of the NeurIPS 2022 Competitions Track, 2022.&#160;<a href="#fnref:39" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:40">
+<p>Z Wang, Z Zhou, J Song, Y Huang, Z Shu, L Ma, <em>VLATest: Testing and Evaluating Vision-Language-Action Models for Robotic Manipulation</em>, Proceedings of the ACM on Software Engineering, 2025.&#160;<a href="#fnref:40" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:41">
+<p>B Zhang, Y Zhang, J Ji, Y Lei, J Dai, Y Chen, Y Yang, <em>SafeVLA: Towards Safety Alignment of Vision-Language-Action Model via Safe Reinforcement Learning</em>, International Conference on Machine Learning, 2025.&#160;<a href="#fnref:41" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:42">
+<p>Physical Intelligence, $\pi_{0.5}$ <em>a Vision-Language-Action Model with Open-World Generalization</em>, 2025.&#160;<a href="#fnref:42" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:42" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref2:42" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:43">
+<p>E K Jones, et al, <em>Adversarial Attacks on Robotic Vision-Language-Action Models</em>, arXiv, 2025.&#160;<a href="#fnref:43" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:44">
+<p>H Cheng, E Xiao, et al, <em>Manipulation Facing Threats: Evaluating Physical Vulnerabilities in End-to-End Vision Language Action Models</em>, arXiv:2409:13174, 2024.&#160;<a href="#fnref:44" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:45">
+<p>J Wei, X Wang, D Shuurmans, M Bosma, B Ichter, F Xia, E H Chi, Q V Le, D Zhou, <em>Chain-of-Thought Prompting Elicits Reasoning in Large Language Models</em>, arXiv:2201.11903v6, 2023.&#160;<a href="#fnref:45" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:46">
+<p>S Zhang, Z Xu, P Liu, X Yi, X Qiu, et al. <em>VLABench: A Large-Scale Benchmark for Language-Conditioned Robotics Manipulation with Long-Horizon Reasoning Tasks</em>, arXiv:2412.18194, 2024.&#160;<a href="#fnref:46" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:47">
+<p>O Mees, L Hermann, E Rosete-Beas, W Burgard, <em>CALVIN: A Benchmark for Language-Conditioned Policy Learning for Long-Horizon Robot Manipulation Tasks</em>, arXiv:2112.03227v4, 2022.&#160;<a href="#fnref:47" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:48">
+<p>R Yang, H Chen, J Zhang, M Zhao, et al, <em>EmbodiedBench: Comprehensive Benchmarking Multi-modal Large Language Models for Vision-Driven Embodied Agents</em>, Proceedings of the 42 nd International Conference on Machine Learning, 2025.&#160;<a href="#fnref:48" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+]]></content:encoded>
+    </item>
     <item>
       <title>Robotic Learning Part 3: The Reality Gap</title>
       <link>http://localhost:1313/deltaq/posts/the-reality-gap/</link>
@@ -1628,7 +2289,7 @@ graph LR
 <ol>
 <li><a href="https://aos55.github.io/deltaq/posts/foundations-of-robotic-learning/">The Fundamentals</a>: Why <em>simple</em> robotic tasks are actually complex.</li>
 <li><a href="https://aos55.github.io/deltaq/posts/key-learning-paradigms-in-robotics/">Learning Paradigms</a>: How to teach robots through demonstrations and experience.</li>
-<li>The Reality Gap: Why simulation alone isn&rsquo;t enough, and what we can do about it.</li>
+<li><a href="https://aos55.github.io/deltaq/posts/the-reality-gap/">The Reality Gap</a>: Why simulation alone isn&rsquo;t enough, and what we can do about it.</li>
 <li>Modern Approaches: How new techniques are making headway on these problems.</li>
 <li>Real World Applications: How these techniques are being applied in the real-world.</li>
 </ol>
