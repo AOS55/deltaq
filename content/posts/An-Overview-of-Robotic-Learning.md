@@ -41,7 +41,7 @@ We'll explore how robot learning is tackling Moravec's paradox:
 1. [The Fundamentals](https://aos55.github.io/deltaq/posts/foundations-of-robotic-learning/): Why *simple* robotic tasks are actually complex.
 2. [Learning Paradigms](https://aos55.github.io/deltaq/posts/key-learning-paradigms-in-robotics/): How to teach robots through demonstrations and experience.
 3. [The Reality Gap](https://aos55.github.io/deltaq/posts/the-reality-gap/): Why simulation alone isn't enough, and what we can do about it.
-4. Modern Approaches: How new techniques are making headway on these problems.
+4. [Modern Approaches](https://aos55.github.io/deltaq/posts/modern-approaches/): How new techniques are making headway on these problems.
 5. Real World Applications: How these techniques are being applied in the real-world.
 
 ## Citation
